@@ -38,10 +38,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 # MODULE 9
 
 ### Context Diagram
-![Context Diagram](ContextDiagram.png)
+![Context Diagram](./public/tutorial/ContextDiagram.png)
 
 ### Container Diagram
-![Container Diagram](ContainerDiagram.png)
+![Container Diagram](./public/tutorial/ContainerDiagram.png)
 
-### Deployment Diagram (UNFINISHED)
-![Unfinished Deployment Diagram]()
+### Deployment Diagram
+![Deployment Diagram](./public/tutorial/DeploymentDiagram.png)
