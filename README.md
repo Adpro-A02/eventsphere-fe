@@ -92,3 +92,6 @@ Mitigation strategies:
 ### Individu Gilbert
 ![Individu Gilbert](./public/tutorial/IndividuGilbert1.jpg)
 ![Individu Gilbert](./public/tutorial/IndividuGilbert2.jpg)
+
+### Individu Refalino
+![Individu Refalino](./public/tutorial/IndividuRefalino.png)
