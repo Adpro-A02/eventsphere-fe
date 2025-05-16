@@ -37,18 +37,18 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 # MODULE 9
 
-### Container Diagram
-![Container Diagram](ContainerDiagram.png)
-
 ### Context Diagram
-![Context Diagram](ContextDiagram.png)
+![Context Diagram](./public/tutorial/ContextDiagram.png)
+
+### Container Diagram
+![Container Diagram](./public/tutorial/ContainerDiagram.png)
 
 ### Deployment Diagram
-![Deployment Diagram](DeploymentDiagram.png)
+![Deployment Diagram](./public/tutorial/DeploymentDiagram.png)
 
 ### Future Architecture
-![Future Context](FutureContext.png)
-![Future Container](FutureContainer.png)
+![Future Context](./public/tutorial/FutureContext.png)
+![Future Container](./public/tutorial/FutureContainer.png)
 
 ### Risk Analysis
  1.  Context-level risks
@@ -80,3 +80,6 @@ Mitigation strategies:
 4. Standardize Development Practices by creating consistent error handling patterns across services, standardizing API contracts and documentation, implement comprehensive integration testing, and ensure proper version management for APIs
 
 5. Implement Disaster Recovery by doing regular database backups with tested restoration procedures, document disaster recovery procedures, conduct regular disaster recovery drills and implement proper data retention policies -->
+
+### Individu Joe
+![Individu Joe](./public/tutorial/IndividuJoe.png)
