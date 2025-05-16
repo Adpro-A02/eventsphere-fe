@@ -95,3 +95,6 @@ Mitigation strategies:
 
 ### Individu Refalino
 ![Individu Refalino](./public/tutorial/IndividuRefalino.png)
+
+### Individu Dylan
+![Individu Dylan](./public/tutorial/IndividuDylan.png)
