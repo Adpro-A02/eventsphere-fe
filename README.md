@@ -43,5 +43,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ### Context Diagram
 ![Context Diagram](ContextDiagram.png)
 
-### Deployment Diagram (UNFINISHED)
-![Unfinished Deployment Diagram]()
+### Deployment Diagram
+![Deployment Diagram](DeploymentDiagram.png)
