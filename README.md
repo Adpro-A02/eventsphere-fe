@@ -45,3 +45,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ### Deployment Diagram
 ![Deployment Diagram](./public/tutorial/DeploymentDiagram.png)
+
+### Individu Joe
+![Individu Joe](./public/tutorial/IndividuJoe.png)
