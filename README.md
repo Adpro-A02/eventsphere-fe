@@ -37,11 +37,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 # MODULE 9
 
-### Container Diagram
-![Container Diagram](ContainerDiagram.png)
-
 ### Context Diagram
 ![Context Diagram](ContextDiagram.png)
+
+### Container Diagram
+![Container Diagram](ContainerDiagram.png)
 
 ### Deployment Diagram (UNFINISHED)
 ![Unfinished Deployment Diagram]()
