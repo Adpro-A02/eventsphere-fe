@@ -85,5 +85,10 @@ Mitigation strategies:
 ![Individu Joe](./public/tutorial/IndividuJoe.png)
 
 ### Individu Priyapta
-![Individu Priyapta](./public/tutorial/Individu_apta_2.png)
 ![Individu Priyapta](./public/tutorial/Individu_apta_1.png)
+![Individu Priyapta](./public/tutorial/Individu_apta_2.png)
+
+
+### Individu Gilbert
+![Individu Gilbert](./public/tutorial/IndividuGilbert1.jpg)
+![Individu Gilbert](./public/tutorial/IndividuGilbert2.jpg)
