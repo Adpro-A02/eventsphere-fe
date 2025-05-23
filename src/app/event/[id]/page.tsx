@@ -48,7 +48,6 @@ export default function EventDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Unwrap the params Promise using React.use()
   const resolvedParams = use(params);
   const eventId = resolvedParams.id;
 

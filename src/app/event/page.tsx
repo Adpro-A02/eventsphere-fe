@@ -1,5 +1,5 @@
 "use client";
-
+import { getToken } from "@/lib/auth-storage";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -43,9 +43,7 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token =
-          "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmNDE3MGM5Yy00YThiLTRiYzItOTgyMS01ODIwMTYzYmUxYzQiLCJyb2xlIjoiQXR0ZW5kZWUiLCJleHAiOjE3NDgwNTI5ODB9.fWTBxUmVML16yE10Au1HQSKrd62VP1Ac0_rrP20GJXA";
-        // const token = localStorage.getItem("token");
+        const token = getToken();
         const response = await fetch("http://localhost:8081/api/events", {
           method: "GET",
 

@@ -52,7 +52,6 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -144,8 +143,6 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
             `Failed to ${isEditing ? "update" : "create"} event`,
         );
       }
-
-      // const eventData = await response.json()
 
       toast({
         title: isEditing ? "Event Updated" : "Event Created",

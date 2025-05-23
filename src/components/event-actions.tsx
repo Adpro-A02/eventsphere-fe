@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircleIcon, XCircleIcon } from "lucide-react";
-
+import { getToken } from "@/lib/auth-storage";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
@@ -22,13 +22,14 @@ export function EventActions({ eventId, status }: EventActionsProps) {
     setIsLoading(true);
 
     try {
+      const token = getToken();
       const response = await fetch(
         `http://localhost:8081/api/events/${eventId}/${action}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            //AUTH
+            Authorization: `Bearer ${token}`,
           },
         },
       );
