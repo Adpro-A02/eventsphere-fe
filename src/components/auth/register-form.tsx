@@ -18,13 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
@@ -39,23 +32,25 @@ export default function RegisterForm() {
   const { setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const form = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      role: UserRole.Attendee,
     },
   });
-
   async function onSubmit(data: RegisterRequest) {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await registerUser(data);
+      const registrationData = {
+        ...data,
+        role: UserRole.Attendee,
+      };
+
+      const response = await registerUser(registrationData);
       setUser({
         id: response.user_id,
         name: response.name,
@@ -74,10 +69,11 @@ export default function RegisterForm() {
 
   return (
     <Card className="w-full max-w-md mx-auto">
+      {" "}
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
-          Enter your details below to create your account
+          Enter your details below to create your attendee account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -88,7 +84,6 @@ export default function RegisterForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <FormField
               control={form.control}
               name="name"
@@ -102,7 +97,6 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="email"
@@ -119,8 +113,7 @@ export default function RegisterForm() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
+            />{" "}
             <FormField
               control={form.control}
               name="password"
@@ -134,37 +127,6 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={UserRole.Attendee}>
-                        Attendee
-                      </SelectItem>
-                      <SelectItem value={UserRole.Organizer}>
-                        Organizer
-                      </SelectItem>
-                      <SelectItem value={UserRole.Admin}>Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Register"}
             </Button>
