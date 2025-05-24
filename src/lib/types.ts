@@ -64,6 +64,37 @@ export const updateProfileSchema = z
     path: ["name"],
   });
 
+// Balance related types
+export interface AddFundsRequest {
+  user_id: string;
+  amount: number;
+  payment_method: string;
+}
+
+export interface WithdrawFundsRequest {
+  user_id: string;
+  amount: number;
+  description: string;
+}
+
+export interface BalanceResponse {
+  balance: number;
+}
+
+export const addFundsSchema = z.object({
+  user_id: z.string().uuid("Please provide a valid user ID"),
+  amount: z.number().positive("Amount must be positive"),
+  payment_method: z.string().min(1, "Payment method is required"),
+});
+
+export const withdrawFundsSchema = z.object({
+  user_id: z.string().uuid("Please provide a valid user ID"),
+  amount: z.number().positive("Amount must be positive"),
+  description: z.string().min(1, "Description is required"),
+});
+
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
+export type AddFundsRequestValidated = z.infer<typeof addFundsSchema>;
+export type WithdrawFundsRequestValidated = z.infer<typeof withdrawFundsSchema>;
