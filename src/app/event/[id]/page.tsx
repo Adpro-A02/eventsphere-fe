@@ -293,6 +293,16 @@ export default function EventDetailPage({
               </div>
             </div>
           </div>
+
+        <div className="pt-6 border-t mt-6">
+          <Button
+            onClick={() => router.push(`/review/${event.id}`)}
+            className="bg-yellow-500 text-white hover:bg-yellow-700 hover:scale-105 transition-transform duration-200 shadow-md"
+          >
+            Lihat Review
+          </Button>
+        </div>
+
         </CardContent>
 
         <CardFooter className="flex flex-wrap gap-2 justify-end">

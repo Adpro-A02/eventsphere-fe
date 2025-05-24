@@ -47,6 +47,7 @@ export default function LoginForm() {
 
     try {
       const response = await login(data);
+      localStorage.setItem("token", response.token);
       setUser({
         id: response.user_id,
         name: response.name,
