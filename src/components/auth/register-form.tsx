@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type RegisterRequest, UserRole, registerSchema } from "@/lib/types";
 import { register as registerUser } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +30,6 @@ import {
 export default function RegisterForm() {
   const router = useRouter();
   const { setUser } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -40,17 +38,16 @@ export default function RegisterForm() {
       password: "",
     },
   });
-  async function onSubmit(data: RegisterRequest) {
-    setIsLoading(true);
-    setError(null);
 
-    try {
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterRequest) => {
       const registrationData = {
         ...data,
         role: UserRole.Attendee,
       };
-
-      const response = await registerUser(registrationData);
+      return await registerUser(registrationData);
+    },
+    onSuccess: (response) => {
       setUser({
         id: response.user_id,
         name: response.name,
@@ -60,11 +57,14 @@ export default function RegisterForm() {
         updated_at: new Date().toISOString(),
       });
       router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
+    },
+  });
+
+  function onSubmit(data: RegisterRequest) {
+    registerMutation.mutate(data);
   }
 
   return (
@@ -79,9 +79,13 @@ export default function RegisterForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
+            {registerMutation.error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {registerMutation.error instanceof Error
+                    ? registerMutation.error.message
+                    : "Registration failed"}
+                </AlertDescription>
               </Alert>
             )}
             <FormField
@@ -127,8 +131,12 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Register"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending ? "Creating account..." : "Register"}
             </Button>
           </form>
         </Form>

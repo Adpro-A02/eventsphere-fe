@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { type LoginRequest, loginSchema } from "@/lib/types";
 import { login } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -31,7 +32,6 @@ export default function LoginForm() {
   const router = useRouter();
   const { setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
@@ -41,12 +41,9 @@ export default function LoginForm() {
     },
   });
 
-  async function onSubmit(data: LoginRequest) {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await login(data);
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: (response) => {
       setUser({
         id: response.user_id,
         name: response.name,
@@ -55,12 +52,17 @@ export default function LoginForm() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+      setError(null);
       router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (error) => {
+      setError(error instanceof Error ? error.message : "Login failed");
+    },
+  });
+
+  async function onSubmit(data: LoginRequest) {
+    setError(null);
+    loginMutation.mutate(data);
   }
 
   return (
@@ -79,7 +81,6 @@ export default function LoginForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <FormField
               control={form.control}
               name="email"
@@ -97,7 +98,6 @@ export default function LoginForm() {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"
@@ -110,10 +110,13 @@ export default function LoginForm() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+            />{" "}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
           </form>
         </Form>
