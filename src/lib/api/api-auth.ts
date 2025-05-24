@@ -9,7 +9,6 @@ import type {
 } from "@/lib/types";
 import {
   saveAuthData,
-  getAuthData,
   clearAuthData,
   decodeTokenExpiry,
   type AuthData,
@@ -104,7 +103,9 @@ export async function refreshToken(): Promise<TokenPair> {
     throw new Error("Cannot refresh token during server-side rendering");
   }
 
-  const { getRefreshToken } = await import("@/lib/auth-storage");
+  const { getRefreshToken, getAuthData, saveAuthData } = await import(
+    "@/lib/auth-storage"
+  );
   const refreshTokenValue = getRefreshToken();
 
   if (!refreshTokenValue) {

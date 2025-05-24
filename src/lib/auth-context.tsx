@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAttendee = (): boolean => hasRole("Attendee");
 
   const refreshUserData = async () => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     try {
       const userData = await getCurrentUser();
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     const initAuth = async () => {
       setIsLoading(true);
