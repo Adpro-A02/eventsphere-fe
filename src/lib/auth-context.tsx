@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { UserResponse } from "@/lib/types";
-import { getCurrentUser, refreshToken } from "@/lib/api";
+import { getCurrentUser, refreshToken } from "@/lib/api/api-auth";
 import { getAuthData, clearAuthData } from "@/lib/auth-storage";
 import { UserRole } from "@/lib/types";
 interface AuthContextType {

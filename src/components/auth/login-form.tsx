@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { type LoginRequest, loginSchema } from "@/lib/types";
-import { login } from "@/lib/api";
+import { login } from "@/lib/api/api-auth";
 import { useAuth } from "@/lib/auth-context";
 
 import { Button } from "@/components/ui/button";
