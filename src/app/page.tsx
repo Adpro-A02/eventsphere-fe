@@ -10,7 +10,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-4xl space-y-8 text-center">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">

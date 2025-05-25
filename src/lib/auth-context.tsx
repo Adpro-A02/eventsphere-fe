@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { UserResponse } from "@/lib/types";
-import { getCurrentUser, refreshToken } from "@/lib/api";
+import { getCurrentUser, refreshToken } from "@/lib/api/api-auth";
 import { getAuthData, clearAuthData } from "@/lib/auth-storage";
 import { UserRole } from "@/lib/types";
 interface AuthContextType {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAttendee = (): boolean => hasRole("Attendee");
 
   const refreshUserData = async () => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     try {
       const userData = await getCurrentUser();
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     const initAuth = async () => {
       setIsLoading(true);

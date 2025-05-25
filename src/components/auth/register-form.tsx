@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type RegisterRequest, UserRole, registerSchema } from "@/lib/types";
-import { register as registerUser } from "@/lib/api";
+import { register as registerUser } from "@/lib/api/api-auth";
 import { useAuth } from "@/lib/auth-context";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,13 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
@@ -37,25 +30,24 @@ import {
 export default function RegisterForm() {
   const router = useRouter();
   const { setUser } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
   const form = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      role: UserRole.Attendee,
     },
   });
 
-  async function onSubmit(data: RegisterRequest) {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await registerUser(data);
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterRequest) => {
+      const registrationData = {
+        ...data,
+        role: UserRole.Attendee,
+      };
+      return await registerUser(registrationData);
+    },
+    onSuccess: (response) => {
       setUser({
         id: response.user_id,
         name: response.name,
@@ -65,30 +57,37 @@ export default function RegisterForm() {
         updated_at: new Date().toISOString(),
       });
       router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
+    },
+  });
+
+  function onSubmit(data: RegisterRequest) {
+    registerMutation.mutate(data);
   }
 
   return (
     <Card className="w-full max-w-md mx-auto">
+      {" "}
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
-          Enter your details below to create your account
+          Enter your details below to create your attendee account
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
+            {registerMutation.error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {registerMutation.error instanceof Error
+                    ? registerMutation.error.message
+                    : "Registration failed"}
+                </AlertDescription>
               </Alert>
             )}
-
             <FormField
               control={form.control}
               name="name"
@@ -102,7 +101,6 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="email"
@@ -119,8 +117,7 @@ export default function RegisterForm() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
+            />{" "}
             <FormField
               control={form.control}
               name="password"
@@ -134,39 +131,12 @@ export default function RegisterForm() {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={UserRole.Attendee}>
-                        Attendee
-                      </SelectItem>
-                      <SelectItem value={UserRole.Organizer}>
-                        Organizer
-                      </SelectItem>
-                      <SelectItem value={UserRole.Admin}>Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Register"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending ? "Creating account..." : "Register"}
             </Button>
           </form>
         </Form>

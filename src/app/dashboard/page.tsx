@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { logout } from "@/lib/api";
+import { logout } from "@/lib/api/api-auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
