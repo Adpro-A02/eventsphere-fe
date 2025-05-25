@@ -48,13 +48,27 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Welcome back, {user?.name}</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <Button variant="outline" asChild>
               <Link href="/profile">Profile</Link>
             </Button>
             <Button asChild>
               <Link href="/event">Lihat Event</Link>
             </Button>
+
+            {/* Tombol untuk Admin */}
+            {user?.role === "Admin" && (
+              <Button asChild variant="destructive">
+                <Link href="/review/flagged">Flagged Reviews</Link>
+              </Button>
+            )}
+
+            {/* Tombol untuk Organizer, pastikan user.eventId ada */}
+          {user?.role === "Organizer" && (
+        <Button asChild variant="secondary">
+          <Link href="/review/organizer">Manage My Event Reviews</Link>
+        </Button>
+      )}
 
             <Button variant="destructive" onClick={handleLogout}>
               Logout
