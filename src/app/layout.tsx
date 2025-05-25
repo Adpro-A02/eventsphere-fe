@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
+import Layout from "@/components/templates/Layout";
 import Providers from "@/libs/tanstack-query/providers";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -30,7 +31,7 @@ export default function RootLayout({
         >
           <Providers>
             <AuthProvider>
-              {children}
+              <Layout>{children}</Layout>
               <Toaster />
             </AuthProvider>
           </Providers>
