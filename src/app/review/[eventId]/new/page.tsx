@@ -17,7 +17,6 @@ export default function CreateReviewPage() {
   const [organizerId, setOrganizerId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Ambil userId dari token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -30,7 +29,6 @@ export default function CreateReviewPage() {
     }
   }, []);
 
-  // Fetch event detail utk ambil organizerId
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) return;
@@ -40,7 +38,6 @@ export default function CreateReviewPage() {
         if (!res.ok) throw new Error("Gagal fetch event");
         const data = await res.json();
 
-        // Sesuaikan property organizerId sesuai response API-mu
         setOrganizerId(data.user_id || data.data?.user_id || null);
       } catch (e) {
         setOrganizerId(null);
@@ -92,9 +89,9 @@ export default function CreateReviewPage() {
       } else {
         alert("Gagal membuat review. Anda sudah pernah membuat review untuk event ini.");
       }
-    } catch (e) {
+    } catch  {
       alert("Terjadi kesalahan saat membuat review.");
-      console.error(e);
+      console.error();
     }
   };
 

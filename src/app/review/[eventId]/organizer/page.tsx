@@ -10,7 +10,7 @@ type Review = {
   userId: string;
   rating: number;
   comment: string;
-  status: string; // e.g. "APPROVED", "FLAGGED"
+  status: string; 
 };
 
 export default function OrganizerReviewPage() {

@@ -110,7 +110,6 @@ export default function ReviewByEventPage() {
     if (eventId) fetchData();
   }, [eventId]);
 
-  // After event fetched and if status COMPLETED, fetch reviews and average rating
   useEffect(() => {
     if (event && event.status === "COMPLETED") {
       fetchReviews();
@@ -186,7 +185,6 @@ export default function ReviewByEventPage() {
     );
   }
 
-  // Only Attendee can create/edit/delete
   const canEditOrCreate = currentUserRole === "Attendee";
 
   return (
