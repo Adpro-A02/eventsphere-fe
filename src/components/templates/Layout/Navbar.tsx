@@ -113,7 +113,7 @@ const Navbar: React.FC = () => {
           <span className="text-xl xl:text-2xl font-semibold text-black hidden lg:block">
             EventSphere.
           </span>
-          <HiSparkles className="text-3xl text-[#01573E] block lg:hidden" />
+          <HiSparkles className="text-3xl text-black block lg:hidden" />
         </div>
       </Link>
 
@@ -134,29 +134,10 @@ const Navbar: React.FC = () => {
         ))}
       </div>
 
-      <div className="max-lg:hidden flex flex-row gap-3">
-        <Link href="/login">
-          <Button
-            variant="outline"
-            className="w-[160px] xl:w-[200px] h-12 text-base font-medium"
-          >
-            Login
-          </Button>
-        </Link>
-        <Link href="/event">
-          <Button
-            variant="default"
-            className="w-[160px] xl:w-[200px] h-12 text-sm xl:text-base font-medium"
-          >
-            Daftar Sebagai Klien
-          </Button>
-        </Link>
-      </div>
-
       {/* Mobile */}
       <div className="max-lg:flex hidden">
         <button
-          className="text-2xl text-[#01573E]"
+          className="text-2xl text-black"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
         >
           {isMobileOpen ? <IoMdClose /> : <GiHamburgerMenu />}
