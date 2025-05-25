@@ -78,7 +78,10 @@ export interface WithdrawFundsRequest {
 }
 
 export interface BalanceResponse {
-  balance: number;
+  id: string;
+  user_id: string;
+  amount: number;
+  updated_at: string;
 }
 
 export const addFundsSchema = z.object({
