@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Your Next.js app (we'll add metrics endpoint)
+  - job_name: 'eventsphere-fe'
+    static_configs:
+      - targets: ['eventsphere-fe:3000']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+
+  # If you have a backend API
+  # - job_name: 'eventsphere-api'
+  #   static_configs:
+  #     - targets: ['host.docker.internal:8000']  # Adjust to your API URL
+  #   metrics_path: '/metrics'
