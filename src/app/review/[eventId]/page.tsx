@@ -29,7 +29,9 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    null,
+  ); /* eslint-disable-line */
 
   const parseToken = () => {
     const token = localStorage.getItem("token");
@@ -51,6 +53,7 @@ export default function ReviewByEventPage() {
       const json = await res.json();
       setEvent(json);
     } catch (e) {
+      /* eslint-disable-line */
       setError("Gagal memuat data event.");
       setEvent(null);
     }
@@ -59,7 +62,9 @@ export default function ReviewByEventPage() {
   // Fetch average rating
   const fetchAverageRating = async () => {
     try {
-      const avgRes = await fetch(`http://localhost:8080/api/reviews/event/${eventId}/average`);
+      const avgRes = await fetch(
+        `http://localhost:8080/api/reviews/event/${eventId}/average`,
+      );
       const avgJson = await avgRes.json();
       setAverageRating(avgJson.data?.averageRating || null);
     } catch (err) {
@@ -71,7 +76,9 @@ export default function ReviewByEventPage() {
   // Fetch reviews
   const fetchReviews = async () => {
     try {
-      const reviewsRes = await fetch(`http://localhost:8080/api/reviews/event/${eventId}`);
+      const reviewsRes = await fetch(
+        `http://localhost:8080/api/reviews/event/${eventId}`,
+      );
       const reviewsJson = await reviewsRes.json();
       setReviews(reviewsJson.data?.reviews || []);
     } catch (err) {
@@ -88,7 +95,9 @@ export default function ReviewByEventPage() {
       const payload = parseToken();
       if (payload) {
         setCurrentUserId(payload.sub || payload.userId || payload.id || null);
-        setCurrentUserRole(payload.role || (payload.roles ? payload.roles[0] : null));
+        setCurrentUserRole(
+          payload.role || (payload.roles ? payload.roles[0] : null),
+        );
       } else {
         setCurrentUserId(null);
         setCurrentUserRole(null);
@@ -117,12 +126,15 @@ export default function ReviewByEventPage() {
     if (!token) return alert("Kamu harus login untuk menghapus review.");
 
     try {
-      const res = await fetch(`http://localhost:8080/api/reviews/delete/${myReview.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `http://localhost:8080/api/reviews/delete/${myReview.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (res.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== myReview.id));
@@ -230,12 +242,16 @@ export default function ReviewByEventPage() {
             <div
               key={review.id}
               className={`border p-4 rounded relative bg-white shadow ${
-                review.userId === currentUserId ? "bg-green-50 border-green-300" : ""
+                review.userId === currentUserId
+                  ? "bg-green-50 border-green-300"
+                  : ""
               }`}
             >
               <div className="mb-2 font-semibold">Rating: {review.rating}</div>
               <p>{review.comment}</p>
-              <p className="text-xs text-gray-400 mt-1">User ID: {review.userId}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                User ID: {review.userId}
+              </p>
             </div>
           ))
         )}
