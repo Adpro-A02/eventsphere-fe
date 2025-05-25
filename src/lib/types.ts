@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-// User role enum to match backend
+// User role enum to match backend - tambah Guest
 export enum UserRole {
   Admin = "Admin",
   Organizer = "Organizer",
   Attendee = "Attendee",
+  Guest = "Guest", // Role untuk user yang tidak login
 }
 
 // API response schema
@@ -42,6 +43,27 @@ export interface TokenPair {
   refresh_token: string;
 }
 
+// Event types
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  basePrice: number;
+  status: "DRAFT" | "PUBLISHED" | "CANCELLED"; // Backend menggunakan uppercase
+  event_date: string; // Backend menggunakan event_date, bukan date terpisah
+  user_id: string; // Backend menggunakan user_id, bukan organizer_id
+  // Optional fields yang mungkin ada
+  organizer_name?: string;
+  capacity?: number;
+  registered_count?: number;
+  created_at?: string;
+  updated_at?: string;
+  image_url?: string;
+  time?: string; // Derived dari event_date
+  date?: string; // Derived dari event_date
+}
+
 // Validation schemas
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -49,6 +71,10 @@ export const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.nativeEnum(UserRole).optional(),
 });
+
+export function isUserRole(value: string): value is UserRole {
+  return Object.values(UserRole).includes(value as UserRole);
+}
 
 export const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -65,6 +91,16 @@ export const updateProfileSchema = z
     path: ["name"],
   });
 
+export const eventSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().min(1, "Time is required"),
+  location: z.string().min(3, "Location must be at least 3 characters"),
+  capacity: z.number().min(1, "Capacity must be at least 1"),
+});
+
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
+export type EventRequest = z.infer<typeof eventSchema>;

@@ -7,15 +7,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { UserResponse } from "@/lib/types";
+import type { UserResponse, UserRole } from "@/lib/types";
 import { getCurrentUser, refreshToken } from "@/lib/api";
 import { getAuthData, clearAuthData } from "@/lib/auth-storage";
-import { UserRole } from "@/lib/types";
+
 interface AuthContextType {
   user: UserResponse | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  userRole: string | null;
+  isGuest: boolean;
+  userRole: UserRole;
   setUser: (user: UserResponse | null) => void;
   refreshUserData: () => Promise<void>;
   hasRole: (role: string) => boolean;
@@ -33,14 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   const isAuthenticated = !!user;
-  const userRole = user?.role || null;
+  const isGuest = !isAuthenticated;
+  const userRole = user?.role || ("Guest" as UserRole);
 
   // Role checking functions
   const hasRole = (role: string): boolean => {
+    if (isGuest) return role === "Guest";
     return userRole === role;
   };
 
   const hasAnyRole = (roles: string[]): boolean => {
+    if (isGuest) return roles.includes("Guest");
     return userRole ? roles.includes(userRole) : false;
   };
 
@@ -94,12 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const authData = getAuthData();
 
       if (authData) {
-        // Set user from stored data first (for immediate UI update)
         setUser({
           id: authData.user.id,
           name: authData.user.name,
           email: authData.user.email,
-          role: authData.user.role as UserRole,
+          role: authData.user
+            .role as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
@@ -113,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
       }
+      // If no auth data, user remains null (guest mode)
 
       setIsLoading(false);
     };
@@ -125,7 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: mounted ? user : null,
     isLoading: mounted ? isLoading : true,
     isAuthenticated: mounted ? isAuthenticated : false,
-    userRole: mounted ? userRole : null,
+    isGuest: mounted ? isGuest : true,
+    userRole: mounted ? userRole : ("Guest" as UserRole),
     setUser,
     refreshUserData,
     hasRole,
