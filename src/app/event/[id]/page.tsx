@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { getEventById, registerForEvent } from "@/lib/event-api";
+import type { Event } from "@/lib/types";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   ArrowLeftIcon,
@@ -37,57 +40,79 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { StatusBadge } from "@/components/status-badge";
 import { EventActions } from "@/components/event-actions";
-import {
-  type Event,
-  type EventApiResponse,
-  mapApiResponseToEvent,
-} from "@/types/event";
 
-export default function EventDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const resolvedParams = use(params);
-  const eventId = resolvedParams.id;
-
+export default function EventDetailPage() {
+  const params = useParams();
   const router = useRouter();
+  const {
+    user,
+    hasRole,
+    isAuthenticated,
+    isGuest,
+    isLoading: authLoading,
+  } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  const eventId = params.id as string;
+
+  const isOrganizer =
+    user && event && (user.id === event.user_id || hasRole("Admin"));
+
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8081/api/events/${eventId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
+        setLoading(true);
+        setError(null);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch event details");
+        console.log("Fetching event:", {
+          eventId,
+          isGuest,
+          authLoading,
+          user: user?.id,
+        });
+
+        const eventData = await getEventById(eventId);
+
+        console.log("Event fetched:", {
+          eventId: eventData.id,
+          status: eventData.status,
+          userId: eventData.user_id,
+          isGuest,
+          UserId: user?.id,
+        });
+
+        if (isGuest && eventData.status !== "PUBLISHED") {
+          console.log("Guest trying to access non-published event");
+          setError("This event is not available for public viewing");
+          return;
         }
 
-        const data = (await response.json()) as EventApiResponse;
+        if (isAuthenticated && !isGuest && eventData.status === "DRAFT") {
+          const userIsOrganizer =
+            user && (user.id === eventData.user_id || hasRole("Admin"));
+          if (!userIsOrganizer) {
+            console.log("Non-organizer trying to access draft event");
+            setError("This event is not available");
+            return;
+          }
+        }
 
-        const mappedEvent = mapApiResponseToEvent(data);
-        setEvent(mappedEvent);
+        setEvent(eventData);
       } catch (err) {
-        setError("Error fetching event details. Please try again later.");
-        console.error(err);
+        console.error("Error fetching event:", err);
+        setError(err instanceof Error ? err.message : "Failed to load event");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvent();
-  }, [eventId]);
+    if (eventId && !authLoading) {
+      fetchEvent();
+    }
+  }, [eventId, authLoading, isGuest, isAuthenticated, user, hasRole]);
 
   const handleDeleteEvent = async () => {
     if (!event) return;
@@ -130,7 +155,7 @@ export default function EventDetailPage({
   };
 
   const formatPrice = (price?: number) => {
-    if (price === undefined || price === null) return "Free";
+    if (price === undefined || price === null || price === 0) return "Free";
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -138,12 +163,12 @@ export default function EventDetailPage({
     }).format(price);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto py-8">
         <div className="mb-6">
           <Link
-            href="/event"
+            href="/events"
             className="flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
@@ -177,7 +202,7 @@ export default function EventDetailPage({
       <div className="container mx-auto py-8">
         <div className="mb-6">
           <Link
-            href="/event"
+            href="/events"
             className="flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeftIcon className="mr-2 h-4 w-4" />
@@ -187,9 +212,22 @@ export default function EventDetailPage({
         <Card className="max-w-3xl mx-auto text-center py-10">
           <CardContent>
             <p className="text-red-500 mb-4">{error || "Event not found"}</p>
-            <Button variant="outline" onClick={() => router.push("/event")}>
+            <Button variant="outline" onClick={() => router.push("/events")}>
               Return to Events
             </Button>
+            {isGuest && (
+              <div className="mt-4">
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/login?returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
+                    )
+                  }
+                >
+                  Login to Access More Events
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -214,42 +252,46 @@ export default function EventDetailPage({
             <CardTitle className="text-2xl">{event.title}</CardTitle>
             <StatusBadge status={event.status} className="mt-2" />
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/event/edit/${event.id}`)}
-            >
-              <EditIcon className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <TrashIcon className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the event.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteEvent}
-                    disabled={isActionLoading}
-                  >
-                    {isActionLoading ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+
+          {/* Organizer Actions - hanya tampil untuk organizer */}
+          {isOrganizer && !isGuest && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/event/edit/${event.id}`)}
+              >
+                <EditIcon className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <TrashIcon className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      the event.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteEvent}
+                      disabled={isActionLoading}
+                    >
+                      {isActionLoading ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -265,7 +307,7 @@ export default function EventDetailPage({
               <CalendarIcon className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
               <div>
                 <h4 className="font-medium">Date</h4>
-                <p>{format(new Date(event.eventDate), "PPP")}</p>
+                <p>{format(new Date(event.event_date), "PPP")}</p>
               </div>
             </div>
 
@@ -288,15 +330,104 @@ export default function EventDetailPage({
             <div className="flex items-start">
               <UserIcon className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
               <div>
-                <h4 className="font-medium">Organizer ID</h4>
-                <p className="truncate max-w-[200px]">{event.userId}</p>
+                <h4 className="font-medium">Organizer</h4>
+                <p className="truncate max-w-[200px]">
+                  {event.user_id || "Unknown Organizer"}
+                </p>
               </div>
             </div>
           </div>
+
+          {/* Registration Section untuk non-organizer */}
+          {!isOrganizer && event.status === "PUBLISHED" && (
+            <div className="border-t pt-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">
+                  Register for this Event
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {event.capacity && event.registered_count !== undefined
+                    ? `${event.capacity - event.registered_count} spots remaining`
+                    : "Registration available"}
+                </p>
+
+                {isAuthenticated && !isGuest ? (
+                  <Button
+                    className="w-full sm:w-auto"
+                    onClick={async () => {
+                      try {
+                        await registerForEvent(event.id);
+                        toast({
+                          title: "Registration successful",
+                          description:
+                            "You have successfully registered for this event.",
+                        });
+                        // Update registered count locally
+                        setEvent({
+                          ...event,
+                          registered_count: (event.registered_count || 0) + 1,
+                        });
+                      } catch (err) {
+                        toast({
+                          title: "Error",
+                          description:
+                            err instanceof Error
+                              ? err.message
+                              : "Failed to register for event",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={
+                      !!event.capacity &&
+                      event.registered_count !== undefined &&
+                      event.registered_count >= event.capacity
+                    }
+                  >
+                    {event.capacity &&
+                    event.registered_count !== undefined &&
+                    event.registered_count >= event.capacity
+                      ? "Event Full"
+                      : "Register Now"}
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Please login to register for this event
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() =>
+                          router.push(
+                            `/login?returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
+                          )
+                        }
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          router.push(
+                            `/register?returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
+                          )
+                        }
+                      >
+                        Sign Up
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="flex flex-wrap gap-2 justify-end">
-          <EventActions eventId={event.id} status={event.status} />
+          {/* EventActions hanya untuk organizer */}
+          {isOrganizer && !isGuest && (
+            <EventActions eventId={event.id} status={event.status} />
+          )}
         </CardFooter>
       </Card>
     </div>
