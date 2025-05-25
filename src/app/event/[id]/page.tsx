@@ -67,25 +67,9 @@ export default function EventDetailPage() {
         setLoading(true);
         setError(null);
 
-        console.log("Fetching event:", {
-          eventId,
-          isGuest,
-          authLoading,
-          user: user?.id,
-        });
-
         const eventData = await getEventById(eventId);
 
-        console.log("Event fetched:", {
-          eventId: eventData.id,
-          status: eventData.status,
-          userId: eventData.user_id,
-          isGuest,
-          UserId: user?.id,
-        });
-
         if (isGuest && eventData.status !== "PUBLISHED") {
-          console.log("Guest trying to access non-published event");
           setError("This event is not available for public viewing");
           return;
         }
@@ -94,7 +78,6 @@ export default function EventDetailPage() {
           const userIsOrganizer =
             user && (user.id === eventData.user_id || hasRole("Admin"));
           if (!userIsOrganizer) {
-            console.log("Non-organizer trying to access draft event");
             setError("This event is not available");
             return;
           }
@@ -427,6 +410,16 @@ export default function EventDetailPage() {
           {/* EventActions hanya untuk organizer */}
           {isOrganizer && !isGuest && (
             <EventActions eventId={event.id} status={event.status} />
+          )}
+
+          {/* Tombol Lihat Review hanya muncul jika event sudah COMPLETED */}
+          {(event?.status as string) === "COMPLETED" && (
+            <Button
+              onClick={() => router.push(`/review/${event.id}`)}
+              className="bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+            >
+              Lihat Review
+            </Button>
           )}
         </CardFooter>
       </Card>
