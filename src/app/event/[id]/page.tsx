@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { getEventById, registerForEvent } from "@/lib/event-api";
+import { getEventById } from "@/lib/event-api";
+
 import type { Event } from "@/lib/types";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -338,12 +339,11 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          {/* Registration Section untuk non-organizer */}
           {!isOrganizer && event.status === "PUBLISHED" && (
             <div className="border-t pt-6">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-lg font-medium mb-2">
-                  Register for this Event
+                  Register Become Atendee
                 </h3>
                 <p className="text-gray-600 mb-4">
                   {event.capacity && event.registered_count !== undefined
@@ -353,42 +353,10 @@ export default function EventDetailPage() {
 
                 {isAuthenticated && !isGuest ? (
                   <Button
-                    className="w-full sm:w-auto"
-                    onClick={async () => {
-                      try {
-                        await registerForEvent(event.id);
-                        toast({
-                          title: "Registration successful",
-                          description:
-                            "You have successfully registered for this event.",
-                        });
-                        // Update registered count locally
-                        setEvent({
-                          ...event,
-                          registered_count: (event.registered_count || 0) + 1,
-                        });
-                      } catch (err) {
-                        toast({
-                          title: "Error",
-                          description:
-                            err instanceof Error
-                              ? err.message
-                              : "Failed to register for event",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    disabled={
-                      !!event.capacity &&
-                      event.registered_count !== undefined &&
-                      event.registered_count >= event.capacity
-                    }
+                    variant="outline"
+                    onClick={() => router.push("/register")}
                   >
-                    {event.capacity &&
-                    event.registered_count !== undefined &&
-                    event.registered_count >= event.capacity
-                      ? "Event Full"
-                      : "Register Now"}
+                    Sign Up
                   </Button>
                 ) : (
                   <div className="space-y-2">
@@ -397,21 +365,8 @@ export default function EventDetailPage() {
                     </p>
                     <div className="flex gap-2">
                       <Button
-                        onClick={() =>
-                          router.push(
-                            `/login?returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
-                          )
-                        }
-                      >
-                        Login
-                      </Button>
-                      <Button
                         variant="outline"
-                        onClick={() =>
-                          router.push(
-                            `/register?returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
-                          )
-                        }
+                        onClick={() => router.push("/register")}
                       >
                         Sign Up
                       </Button>

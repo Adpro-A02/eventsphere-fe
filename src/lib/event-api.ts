@@ -48,9 +48,9 @@ export async function cancelEvent(eventId: string): Promise<Event> {
   throw new Error(data.message);
 }
 
-export async function registerForEvent(eventId: string): Promise<void> {
-  const { data } = await api.post<ApiResponse<void>>(
-    `/api/events/${eventId}/register`,
-  );
-  if (!data.success) throw new Error(data.message);
-}
+// export async function registerForEvent(eventId: string): Promise<void> {
+//   const { data } = await api.post<ApiResponse<void>>(
+//     `/api/events/${eventId}/register`,
+//   );
+//   if (!data.success) throw new Error(data.message);
+// }
