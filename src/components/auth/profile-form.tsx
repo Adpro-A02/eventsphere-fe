@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type UpdateProfileRequest, updateProfileSchema } from "@/lib/types";
-import { updateProfile } from "@/lib/api";
+import { updateProfile } from "@/lib/api/api-auth";
 import { useAuth } from "@/lib/auth-context";
 
 import { Button } from "@/components/ui/button";

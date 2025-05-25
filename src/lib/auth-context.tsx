@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { UserResponse, UserRole } from "@/lib/types";
-import { getCurrentUser, refreshToken } from "@/lib/api";
+import { getCurrentUser, refreshToken } from "@/lib/api/api-auth";
 import { getAuthData, clearAuthData } from "@/lib/auth-storage";
 
 interface AuthContextType {
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAttendee = (): boolean => hasRole("Attendee");
 
   const refreshUserData = async () => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     try {
       const userData = await getCurrentUser();
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || typeof window === "undefined") return;
 
     const initAuth = async () => {
       setIsLoading(true);
@@ -108,7 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updated_at: new Date().toISOString(),
         });
 
-        // Then refresh from server to get latest data
         try {
           await refreshUserData();
         } catch (error) {
@@ -117,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
       }
-      // If no auth data, user remains null (guest mode)
 
       setIsLoading(false);
     };

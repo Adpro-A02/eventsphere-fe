@@ -58,7 +58,6 @@ export default function EventDetailPage() {
 
   const eventId = params.id as string;
 
-  // Check if current user is the organizer of this event
   const isOrganizer =
     user && event && (user.id === event.user_id || hasRole("Admin"));
 
@@ -85,14 +84,12 @@ export default function EventDetailPage() {
           UserId: user?.id,
         });
 
-        // Jika user adalah guest dan event bukan PUBLISHED, tampilkan error
         if (isGuest && eventData.status !== "PUBLISHED") {
           console.log("Guest trying to access non-published event");
           setError("This event is not available for public viewing");
           return;
         }
 
-        // Jika user authenticated tapi bukan organizer dan event adalah DRAFT, cek role
         if (isAuthenticated && !isGuest && eventData.status === "DRAFT") {
           const userIsOrganizer =
             user && (user.id === eventData.user_id || hasRole("Admin"));
@@ -112,7 +109,6 @@ export default function EventDetailPage() {
       }
     };
 
-    // Hanya fetch jika ada eventId dan auth sudah selesai loading
     if (eventId && !authLoading) {
       fetchEvent();
     }
@@ -167,7 +163,6 @@ export default function EventDetailPage() {
     }).format(price);
   };
 
-  // Show loading while auth is loading or event is loading
   if (authLoading || loading) {
     return (
       <div className="container mx-auto py-8">

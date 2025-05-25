@@ -69,7 +69,6 @@ export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.nativeEnum(UserRole).optional(),
 });
 
 export function isUserRole(value: string): value is UserRole {
@@ -100,7 +99,37 @@ export const eventSchema = z.object({
   capacity: z.number().min(1, "Capacity must be at least 1"),
 });
 
+export interface AddFundsRequest {
+  user_id: string;
+  amount: number;
+  payment_method: string;
+}
+
+export interface WithdrawFundsRequest {
+  user_id: string;
+  amount: number;
+  description: string;
+}
+
+export interface BalanceResponse {
+  balance: number;
+}
+
+export const addFundsSchema = z.object({
+  user_id: z.string().uuid("Please provide a valid user ID"),
+  amount: z.number().positive("Amount must be positive"),
+  payment_method: z.string().min(1, "Payment method is required"),
+});
+
+export const withdrawFundsSchema = z.object({
+  user_id: z.string().uuid("Please provide a valid user ID"),
+  amount: z.number().positive("Amount must be positive"),
+  description: z.string().min(1, "Description is required"),
+});
+
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
 export type EventRequest = z.infer<typeof eventSchema>;
+export type AddFundsRequestValidated = z.infer<typeof addFundsSchema>;
+export type WithdrawFundsRequestValidated = z.infer<typeof withdrawFundsSchema>;
