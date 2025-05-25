@@ -1,16 +1,16 @@
-FROM node:18-alpine AS deps
+FROM node:23-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-FROM node:18-alpine AS builder
+FROM node:23-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:23-slim AS runner
 WORKDIR /app
 ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
