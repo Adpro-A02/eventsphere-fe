@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { getToken } from "@/lib/auth-storage";
 
 interface EventFormProps {
   initialData?: {
@@ -125,13 +126,13 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
         ? `http://localhost:8081/api/events/${initialData?.id}`
         : "http://localhost:8081/api/events";
       const method = isEditing ? "PUT" : "POST";
-
+      const token = getToken();
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
-          // Add authorization header if needed
-          // "Authorization": `Bearer ${token}`
+
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(apiFormData),
       });
