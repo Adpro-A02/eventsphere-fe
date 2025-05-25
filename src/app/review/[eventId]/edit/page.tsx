@@ -60,8 +60,15 @@ export default function EditReviewPage() {
 
   return (
     <Card className="max-w-xl mx-auto mt-10 p-6">
-      <CardHeader>
+      <CardHeader className="flex justify-between items-center">
         <CardTitle>Edit Review</CardTitle>
+      <Button
+        variant="outline"
+        onClick={() => router.push(`/review/${eventId}`)}
+        className="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors duration-200"
+      >
+        ← Back to Reviews
+      </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <Input

@@ -14,37 +14,100 @@ export default function CreateReviewPage() {
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [organizerId, setOrganizerId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
+  // Ambil userId dari token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUserId(payload.sub);
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setUserId(payload.sub);
+      } catch {
+        setUserId(null);
+      }
     }
   }, []);
 
-  const handleSubmit = async () => {
-    const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:8080/api/reviews", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        eventId,
-        userId,
-        rating,
-        comment,
-      }),
-    });
+  // Fetch event detail utk ambil organizerId
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!eventId) return;
 
-    if (res.ok) {
-      router.push(`/review/${eventId}`);
-    } else {
-      alert("Gagal membuat review.");
+      try {
+        const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
+        if (!res.ok) throw new Error("Gagal fetch event");
+        const data = await res.json();
+
+        // Sesuaikan property organizerId sesuai response API-mu
+        setOrganizerId(data.user_id || data.data?.user_id || null);
+      } catch (e) {
+        setOrganizerId(null);
+        console.error("Error fetch event:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
+
+  const handleSubmit = async () => {
+    if (!userId) {
+      alert("Anda harus login terlebih dahulu.");
+      return;
+    }
+    if (!organizerId) {
+      alert("Tidak dapat menentukan organizer event.");
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    const payload = {
+      eventId,
+      organizerId,
+      userId,
+      rating,
+      comment,
+      createdDate: now,
+      updatedDate: now,
+    };
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const res = await fetch("http://localhost:8080/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        router.push(`/review/${eventId}`);
+      } else {
+        alert("Gagal membuat review. Anda sudah pernah membuat review untuk event ini.");
+      }
+    } catch (e) {
+      alert("Terjadi kesalahan saat membuat review.");
+      console.error(e);
     }
   };
+
+  if (loading) {
+    return (
+      <Card className="max-w-xl mx-auto mt-10 p-6">
+        <CardHeader>
+          <CardTitle>Memuat data event...</CardTitle>
+        </CardHeader>
+        <CardContent>Mohon tunggu...</CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-xl mx-auto mt-10 p-6">

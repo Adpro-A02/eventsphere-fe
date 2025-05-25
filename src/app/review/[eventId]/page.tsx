@@ -13,46 +13,101 @@ type Review = {
   comment: string;
 };
 
+type Event = {
+  id: string;
+  status: string; // misal "COMPLETED", "PUBLISHED", etc
+};
+
 export default function ReviewByEventPage() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.eventId as string;
 
+  const [event, setEvent] = useState<Event | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const getCurrentUserIdFromToken = (): string | null => {
+  const parseToken = () => {
     const token = localStorage.getItem("token");
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.sub || payload.userId || payload.id || null;
+      return payload;
     } catch (e) {
       console.error("Invalid JWT:", e);
       return null;
     }
   };
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const userId = getCurrentUserIdFromToken();
-      setCurrentUserId(userId);
+  // Fetch event detail
+  const fetchEvent = async () => {
+    try {
+      const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
+      if (!res.ok) throw new Error("Event tidak ditemukan");
+      const json = await res.json();
+      setEvent(json);
+    } catch (e) {
+      setError("Gagal memuat data event.");
+      setEvent(null);
+    }
+  };
 
-      try {
-        const res = await fetch(`http://localhost:8080/api/reviews/event/${eventId}`);
-        const json = await res.json();
-        setReviews(json.data?.reviews || []);
-      } catch (err) {
-        console.error("Error fetching reviews:", err);
-        setReviews([]);
-      } finally {
-        setLoading(false);
+  // Fetch average rating
+  const fetchAverageRating = async () => {
+    try {
+      const avgRes = await fetch(`http://localhost:8080/api/reviews/event/${eventId}/average`);
+      const avgJson = await avgRes.json();
+      setAverageRating(avgJson.data?.averageRating || null);
+    } catch (err) {
+      console.error("Error fetching average rating:", err);
+      setAverageRating(null);
+    }
+  };
+
+  // Fetch reviews
+  const fetchReviews = async () => {
+    try {
+      const reviewsRes = await fetch(`http://localhost:8080/api/reviews/event/${eventId}`);
+      const reviewsJson = await reviewsRes.json();
+      setReviews(reviewsJson.data?.reviews || []);
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+      setReviews([]);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      const payload = parseToken();
+      if (payload) {
+        setCurrentUserId(payload.sub || payload.userId || payload.id || null);
+        setCurrentUserRole(payload.role || (payload.roles ? payload.roles[0] : null));
+      } else {
+        setCurrentUserId(null);
+        setCurrentUserRole(null);
       }
+
+      await fetchEvent();
+      setLoading(false);
     };
 
-    if (eventId) fetchReviews();
+    if (eventId) fetchData();
   }, [eventId]);
+
+  // After event fetched and if status COMPLETED, fetch reviews and average rating
+  useEffect(() => {
+    if (event && event.status === "COMPLETED") {
+      fetchReviews();
+      fetchAverageRating();
+    }
+  }, [event]);
 
   const myReview = reviews.find((r) => r.userId === currentUserId);
 
@@ -71,6 +126,8 @@ export default function ReviewByEventPage() {
 
       if (res.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== myReview.id));
+        alert("Review berhasil dihapus");
+        await fetchAverageRating();
       } else {
         alert("Gagal saat menghapus review.");
       }
@@ -95,19 +152,60 @@ export default function ReviewByEventPage() {
     );
   }
 
+  if (!event) {
+    return (
+      <Card className="max-w-3xl mx-auto mt-10 p-6">
+        <CardContent>
+          <p className="text-red-600">Event tidak ditemukan.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (event.status !== "COMPLETED") {
+    return (
+      <Card className="max-w-3xl mx-auto mt-10 p-6">
+        <CardContent>
+          <p className="text-yellow-700 font-semibold">
+            Review hanya bisa dilihat setelah event selesai (status COMPLETED).
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Only Attendee can create/edit/delete
+  const canEditOrCreate = currentUserRole === "Attendee";
+
   return (
     <Card className="max-w-3xl mx-auto mt-10 p-6">
+      <div className="mb-4 flex justify-between items-center">
+        <Button
+          onClick={() => router.push(`/event/${eventId}`)}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors duration-200"
+        >
+          ← Back
+        </Button>
+        {averageRating !== null && (
+          <div className="text-lg font-semibold">
+            Rating untuk Event Ini: {averageRating.toFixed(2)}
+          </div>
+        )}
+      </div>
+
       <CardHeader className="flex justify-between items-center gap-2 flex-wrap">
         <CardTitle>Review untuk Event</CardTitle>
         <div className="flex gap-2">
-          <Button
-            className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => router.push(`/review/${eventId}/new`)}
-          >
-            Tambah Review
-          </Button>
+          {canEditOrCreate && !myReview && (
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => router.push(`/review/${eventId}/new`)}
+            >
+              Tambah Review
+            </Button>
+          )}
 
-          {myReview && (
+          {canEditOrCreate && myReview && (
             <>
               <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -116,10 +214,7 @@ export default function ReviewByEventPage() {
                 Edit Review Saya
               </Button>
 
-              <Button
-                variant="destructive"
-                onClick={handleDeleteMyReview}
-              >
+              <Button variant="destructive" onClick={handleDeleteMyReview}>
                 Hapus Review Saya
               </Button>
             </>
@@ -132,8 +227,13 @@ export default function ReviewByEventPage() {
           <div className="text-gray-500">Belum ada review untuk event ini.</div>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border p-4 rounded relative bg-white shadow">
-              <div className="mb-2 font-semibold">Rating: {review.rating}/5</div>
+            <div
+              key={review.id}
+              className={`border p-4 rounded relative bg-white shadow ${
+                review.userId === currentUserId ? "bg-green-50 border-green-300" : ""
+              }`}
+            >
+              <div className="mb-2 font-semibold">Rating: {review.rating}</div>
               <p>{review.comment}</p>
               <p className="text-xs text-gray-400 mt-1">User ID: {review.userId}</p>
             </div>
