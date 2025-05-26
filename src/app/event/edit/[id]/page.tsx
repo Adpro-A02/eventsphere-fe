@@ -12,23 +12,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EventForm } from "@/components/event-form";
+import { EditEventForm } from "@/components/event/edit-event-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  type Event,
-  type EventApiResponse,
-  mapApiResponseToEvent,
-} from "@/types/event";
+import { AuthError } from "@/components/auth-error";
+import { useAuth } from "@/lib/auth-context";
+import { getEventById } from "@/lib/event-api";
+import type { Event } from "@/lib/types";
 
 export default function EditEventPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Unwrap the params Promise using React.use()
   const resolvedParams = use(params);
   const eventId = resolvedParams.id;
 
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,26 +35,14 @@ export default function EditEventPage({
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8081/api/events/${eventId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch event details");
-        }
-
-        const data = (await response.json()) as EventApiResponse;
-        // Map API response to frontend format
-        const mappedEvent = mapApiResponseToEvent(data);
-        setEvent(mappedEvent);
+        const data = await getEventById(eventId);
+        setEvent(data);
       } catch (err) {
-        setError("Error fetching event details. Please try again later.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Error fetching event details. Please try again later.",
+        );
         console.error(err);
       } finally {
         setLoading(false);
@@ -64,6 +51,20 @@ export default function EditEventPage({
 
     fetchEvent();
   }, [eventId]);
+
+  const canEditEvent = () => {
+    if (!isAuthenticated || !user || !event) return false;
+
+    // Admin can edit any event
+    if (isAdmin()) return true;
+
+    return user.id === event.user_id;
+  };
+
+  const userCanEditEvent = canEditEvent();
+  const errorMessage = !isAuthenticated
+    ? "You need to be logged in to edit events."
+    : "You can only edit events that you created.";
 
   return (
     <div className="container mx-auto py-8">
@@ -83,7 +84,9 @@ export default function EditEventPage({
           <CardDescription>Update the details of your event</CardDescription>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {!userCanEditEvent ? (
+            <AuthError message={errorMessage} />
+          ) : loading ? (
             <div className="space-y-4">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-24 w-full" />
@@ -105,18 +108,7 @@ export default function EditEventPage({
               </Button>
             </div>
           ) : event ? (
-            <EventForm
-              initialData={{
-                id: event.id,
-                title: event.title,
-                description: event.description,
-                event_date: event.eventDate ?? "",
-
-                location: event.location,
-                basePrice: event.basePrice,
-              }}
-              isEditing={true}
-            />
+            <EditEventForm initialData={event} />
           ) : (
             <div className="text-center py-6">
               <p className="text-red-500 mb-4">Event not found</p>
