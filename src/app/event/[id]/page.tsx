@@ -37,6 +37,13 @@ export default function EventDetailPage() {
         setIsLoading(true);
         setError(null);
 
+        console.log("Fetching event:", {
+          eventId,
+          isGuest,
+          authLoading,
+          user: user?.id,
+        });
+
         const eventData = await getEventById(eventId);
 
         // Jika user adalah guest dan event adalah PUBLISHED, require login
