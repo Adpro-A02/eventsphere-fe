@@ -34,3 +34,67 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+# MODULE 9
+
+### Context Diagram
+![Context Diagram](./public/tutorial/ContextDiagram.png)
+
+### Container Diagram
+![Container Diagram](./public/tutorial/ContainerDiagram.png)
+
+### Deployment Diagram
+![Deployment Diagram](./public/tutorial/DeploymentDiagram.png)
+
+### Future Architecture
+![Future Context](./public/tutorial/FutureContext.png)
+![Future Container](./public/tutorial/FutureContainer.png)
+
+### Risk Analysis
+ 1.  Context-level risks
+    - auth level bypass
+    - data privacy breach
+    - single point of failure on api gateway
+    - payment gateway failure
+    - unauthorised api calls
+
+2.  container-level risks
+    - single database dependency
+    - auth service overload
+    - slow and inconsisten data retrievals
+
+3.  deployment-level risks
+    - database single point of failure
+    - microservice communication failures
+    - uneven load distribution
+    - deployment downtime and complexity
+
+Mitigation strategies:
+
+1. Implement high availability and concurrency for high uptime components by deploying the database in a clustered configuration, implement concurrency techniques for the API Gateway & Auth services, and configure proper load balancing across all services
+
+2. Enhance Security Measures by implement comprehensive API authentication and authorization, put encryption measures on sensitive data both in transit and at rest, do regular security audits and penetration testing and implement proper rate limiting and DDoS protection
+
+3. Improve System Observability by implementing centralized logging and monitoring, create or use external software to check system health, and implement distributed tracing across services
+
+4. Standardize Development Practices by creating consistent error handling patterns across services, standardizing API contracts and documentation, implement comprehensive integration testing, and ensure proper version management for APIs
+
+5. Implement Disaster Recovery by doing regular database backups with tested restoration procedures, document disaster recovery procedures, conduct regular disaster recovery drills and implement proper data retention policies -->
+
+### Individu Joe
+![Individu Joe](./public/tutorial/IndividuJoe.png)
+
+### Individu Priyapta
+![Individu Priyapta](./public/tutorial/Individu_apta_1.png)
+![Individu Priyapta](./public/tutorial/Individu_apta.png)
+
+
+### Individu Gilbert
+![Individu Gilbert](./public/tutorial/IndividuGilbert1.jpg)
+![Individu Gilbert](./public/tutorial/IndividuGilbert2.jpg)
+
+### Individu Refalino
+![Individu Refalino](./public/tutorial/IndividuRefalino.png)
+
+### Individu Dylan
+![Individu Dylan](./public/tutorial/IndividuDylan.png)
