@@ -3,6 +3,9 @@ import type {
   AddFundsRequest,
   WithdrawFundsRequest,
   BalanceResponse,
+  Transaction,
+  CreateTransactionRequest,
+  ProcessPaymentRequest,
 } from "@/lib/types";
 import apiTransactions from "@/libs/axios/apiTransactions";
 import { AxiosResponse } from "axios";
@@ -46,6 +49,61 @@ export async function withdrawFunds(
 export async function getUserBalance(userId: string): Promise<BalanceResponse> {
   const response = await apiTransactions.get<ApiResponse<BalanceResponse>>(
     `/api/users/${userId}/balance`,
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function createTransaction(
+  data: CreateTransactionRequest,
+): Promise<Transaction> {
+  const response = await apiTransactions.post<ApiResponse<Transaction>>(
+    "/api/transactions",
+    data,
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function processPayment(
+  transactionId: string,
+  data?: ProcessPaymentRequest,
+): Promise<Transaction> {
+  const response = await apiTransactions.put<ApiResponse<Transaction>>(
+    `/api/transactions/${transactionId}/process`,
+    data || {},
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function getTransaction(
+  transactionId: string,
+): Promise<Transaction> {
+  const response = await apiTransactions.get<ApiResponse<Transaction>>(
+    `/api/transactions/${transactionId}`,
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function getUserTransactions(
+  userId: string,
+): Promise<Transaction[]> {
+  const response = await apiTransactions.get<ApiResponse<Transaction[]>>(
+    `/api/users/${userId}/transactions`,
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function validatePayment(transactionId: string): Promise<boolean> {
+  const response = await apiTransactions.get<ApiResponse<boolean>>(
+    `/api/transactions/${transactionId}/validate`,
+  );
+  return handleTransactionResponse(response);
+}
+
+export async function refundTransaction(
+  transactionId: string,
+): Promise<Transaction> {
+  const response = await apiTransactions.put<ApiResponse<Transaction>>(
+    `/api/transactions/${transactionId}/refund`,
   );
   return handleTransactionResponse(response);
 }
