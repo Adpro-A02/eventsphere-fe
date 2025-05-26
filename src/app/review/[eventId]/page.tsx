@@ -29,7 +29,7 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>( // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(
     null,
   ); /* eslint-disable-line */
 
@@ -47,7 +47,9 @@ export default function ReviewByEventPage() {
 
   const fetchEvent = async () => {
     try {
-      const res = await fetch(`http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`);
+      const res = await fetch(
+        `http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`,
+      );
       if (!res.ok) throw new Error("Event tidak ditemukan");
       const json = await res.json();
       setEvent(json);
@@ -60,7 +62,7 @@ export default function ReviewByEventPage() {
   const fetchAverageRating = async () => {
     try {
       const avgRes = await fetch(
-`https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}/average`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}/average`,
       );
       const avgJson = await avgRes.json();
       setAverageRating(avgJson.data?.averageRating || null);
