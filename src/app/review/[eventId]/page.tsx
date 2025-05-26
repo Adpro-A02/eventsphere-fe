@@ -29,7 +29,9 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null,); /* eslint-disable-line */
+  const [error, setError] = useState<string | null>(
+    null,
+  ); /* eslint-disable-line */
 
   const parseToken = () => {
     const token = localStorage.getItem("token");
@@ -43,14 +45,13 @@ export default function ReviewByEventPage() {
     }
   };
 
-  // Fetch event detail
   const fetchEvent = async () => {
     try {
       const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
       if (!res.ok) throw new Error("Event tidak ditemukan");
       const json = await res.json();
       setEvent(json);
-    } catch  { /* eslint-disable-line */
+    } catch {
       setError("Gagal memuat data event.");
       setEvent(null);
     }
@@ -60,7 +61,7 @@ export default function ReviewByEventPage() {
   const fetchAverageRating = async () => {
     try {
       const avgRes = await fetch(
-        `http://localhost:8080/api/reviews/event/${eventId}/average`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}/average`,
       );
       const avgJson = await avgRes.json();
       setAverageRating(avgJson.data?.averageRating || null);
@@ -74,7 +75,7 @@ export default function ReviewByEventPage() {
   const fetchReviews = async () => {
     try {
       const reviewsRes = await fetch(
-        `http://localhost:8080/api/reviews/event/${eventId}`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}`,
       );
       const reviewsJson = await reviewsRes.json();
       setReviews(reviewsJson.data?.reviews || []);
@@ -123,7 +124,7 @@ export default function ReviewByEventPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/reviews/delete/${myReview.id}`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/delete/${myReview.id}`,
         {
           method: "DELETE",
           headers: {
