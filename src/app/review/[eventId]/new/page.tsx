@@ -34,7 +34,7 @@ export default function CreateReviewPage() {
       if (!eventId) return;
 
       try {
-        const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
+        const res = await fetch(`http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`);
         if (!res.ok) throw new Error("Gagal fetch event");
         const data = await res.json();
 
