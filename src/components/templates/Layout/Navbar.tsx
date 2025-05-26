@@ -6,9 +6,9 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdClose } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import { HiUser } from "react-icons/hi2";
-import { HiArrowRightEndOnRectangle } from "react-icons/hi2";
 import { HiSparkles } from "react-icons/hi2";
-import { handleLogout, isAdmin as checkIsAdmin } from "@/libs/auth/auth";
+import { HiCreditCard } from "react-icons/hi2";
+import { isAdmin as checkIsAdmin } from "@/libs/auth/auth";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
@@ -27,22 +27,34 @@ const Navbar: React.FC = () => {
     }
   }, [pathname, isAdminRoute, router]);
 
-  if (pathname === "/login" || pathname === "/register") {
+  if (
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/unathorized")
+  ) {
     return null;
   }
-
-  const NavRoute = [
+  const fullNavRoute = [
     { id: 1, href: "/ads", name: "Manajemen Iklan" },
     { id: 3, href: "/event", name: "Event" },
     { id: 4, href: "/transaction", name: "Transaksi" },
     { id: 5, href: "/ticket", name: "Ticket" },
+    { id: 6, href: "/admin", name: "Admin", adminOnly: true },
   ];
+  const NavRoute = fullNavRoute.filter((route) => !route.adminOnly || isAdmin);
   const fullAdminNavRoute = [
     {
       id: 1,
       href: "/admin",
-      name: "Admin",
+      name: "Dashboard",
       icon: <HiUser className="text-xl" />,
+      adminOnly: true,
+    },
+    {
+      id: 2,
+      href: "/admin/transactions",
+      name: "Transactions",
+      icon: <HiCreditCard className="text-xl" />,
       adminOnly: true,
     },
   ];
@@ -72,7 +84,7 @@ const Navbar: React.FC = () => {
                 {AdminNavRoute.map(({ id, href, name, icon }) => (
                   <Link key={id} href={href} className="w-full">
                     <div
-                      className={`flex items-center gap-3 py-3 px-2 rounded-md ${pathname === href ? "bg-black text-white hover:bg-[#01573E]" : "text-[#01573E] hover:bg-[#01573E]/10"}`}
+                      className={`flex items-center gap-3 py-3 px-2 rounded-md ${pathname === href ? "bg-black text-white hover:bg-black/10" : "text-black hover:bg-black/10"}`}
                     >
                       {icon}
                       <span className="text-lg">{name}</span>
@@ -83,14 +95,13 @@ const Navbar: React.FC = () => {
 
               <div>
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   className="flex items-center gap-2 px-4 py-3"
                   onClick={() => {
-                    handleLogout();
+                    router.push("/dashboard");
                   }}
                 >
-                  <HiArrowRightEndOnRectangle className="w-6 h-6 text-white" />
-                  <span className="text-white font-normal text-lg">Logout</span>
+                  Dashboard
                 </Button>
               </div>
             </div>

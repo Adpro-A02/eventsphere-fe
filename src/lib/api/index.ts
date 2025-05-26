@@ -8,4 +8,16 @@ export {
   logout,
 } from "./api-auth";
 
-export { addFunds, withdrawFunds, getUserBalance } from "./api-transactions";
+export {
+  addFunds,
+  withdrawFunds,
+  getUserBalance,
+  createTransaction,
+  processPayment,
+  getTransaction,
+  getUserTransactions,
+  validatePayment,
+  refundTransaction,
+  getAllTransactions,
+  deleteTransaction,
+} from "./api-transactions";

@@ -107,3 +107,19 @@ export async function refundTransaction(
   );
   return handleTransactionResponse(response);
 }
+
+export async function getAllTransactions(): Promise<Transaction[]> {
+  const response =
+    await apiTransactions.get<ApiResponse<Transaction[]>>("/api/transactions");
+  return handleTransactionResponse(response);
+}
+
+export async function deleteTransaction(transactionId: string): Promise<void> {
+  const response = await apiTransactions.delete<ApiResponse<null>>(
+    `/api/transactions/${transactionId}`,
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.message || "Failed to delete transaction");
+  }
+}
