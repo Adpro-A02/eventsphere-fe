@@ -205,7 +205,6 @@ export function CreateEventForm() {
                 onChange={(e) => {
                   setTime(e.target.value);
 
-                  // Reset error kalau sebelumnya error event_date
                   if (errors.event_date) {
                     setErrors((prev) => {
                       const newErrors = { ...prev };
@@ -214,10 +213,9 @@ export function CreateEventForm() {
                     });
                   }
 
-                  // Update event_date secara langsung saat waktu berubah
                   if (date) {
-                    const dateStr = date.toISOString().slice(0, 10); // yyyy-mm-dd
-                    const dateTime = `${dateStr}T${e.target.value}:00`; // waktu lengkap
+                    const dateStr = date.toISOString().slice(0, 10);
+                    const dateTime = `${dateStr}T${e.target.value}:00`;
                     setFormData((prev) => ({ ...prev, event_date: dateTime }));
                   }
                 }}
