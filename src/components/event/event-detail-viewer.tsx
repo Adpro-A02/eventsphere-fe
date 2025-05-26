@@ -174,7 +174,7 @@ export default function EventDetailViewer({
             </div>
           )}
 
-          {event.status as string === "COMPLETED" && ( /* eslint-disable @typescript-eslint/no-wrapper-object-types */
+          {event.status as string === "COMPLETED" && ( /* eslint-disable @typescript-eslint/no-wrapper-object-types */ 
             <div className="border-t pt-6 max-w-3xl mx-auto">
               <Link href={`/review/${eventId}`}>
                 <Button variant="outline" size="lg" className="w-full">
