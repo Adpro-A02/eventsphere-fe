@@ -191,25 +191,6 @@ export default function EventDetailOrganizer({
               </div>
             </div>
           </div>
-
-          {/* Kalo ada yang kelebihan kurangin */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Management Event</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/event/${event.id}/attendees`)}
-              >
-                View Attendees
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/event/${event.id}/analytics`)}
-              >
-                Analytics
-              </Button>
-            </div>
-          </div>
         </CardContent>
 
         <CardFooter className="flex flex-wrap gap-2 justify-end">
