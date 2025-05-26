@@ -134,6 +134,43 @@ export const withdrawFundsSchema = z.object({
   description: z.string().min(1, "Description is required"),
 });
 
+// Transaction types
+export interface Transaction {
+  id: string;
+  user_id: string;
+  ticket_id: string | null;
+  amount: number;
+  status: "Pending" | "Success" | "Failed" | "Refunded";
+  description: string;
+  payment_method: string;
+  external_reference: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateTransactionRequest {
+  user_id: string;
+  ticket_id?: string;
+  amount: number;
+  description: string;
+  payment_method: string;
+}
+
+export interface ProcessPaymentRequest {
+  external_reference?: string;
+}
+
+export const ticketPurchaseSchema = z.object({
+  quantity: z
+    .number()
+    .int("Quantity must be a whole number")
+    .positive("Quantity must be positive"),
+  eventId: z.string().uuid("Please provide a valid event ID"),
+  userId: z.string().uuid("Please provide a valid user ID"),
+});
+
+export type TicketPurchaseRequest = z.infer<typeof ticketPurchaseSchema>;
+
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest = z.infer<typeof loginSchema>;
 export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
