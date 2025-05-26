@@ -19,6 +19,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { createEvent } from "@/lib/event-api";
+import { AxiosError } from "axios";
 
 export function CreateEventForm() {
   const router = useRouter();
@@ -54,8 +55,8 @@ export function CreateEventForm() {
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
     if (selectedDate) {
-      const dateStr = selectedDate.toISOString().slice(0, 10); // yyyy-mm-dd
-      const dateTime = `${dateStr}T${time}:00`; // Tambahkan waktu
+      const dateStr = selectedDate.toISOString().slice(0, 10);
+      const dateTime = `${dateStr}T${time}:00`;
       setFormData((prev) => ({ ...prev, event_date: dateTime }));
       console.log("Selected event datetime:", dateTime);
 
@@ -123,19 +124,20 @@ export function CreateEventForm() {
       });
 
       router.push("/event");
-    } catch (error: any) {
-      /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      console.error("Error creating event:", error);
+    } catch (error: unknown) {
+      let errorMessage = "Something went wrong.";
+
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong.",
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
