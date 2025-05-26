@@ -26,8 +26,9 @@ export default function EditReviewPage() {
       .then((res) => res.json())
       .then((data) => {
         const existing = data.data.reviews.find(
+          /* eslint-disable-next-line */
           (r: any) => r.userId === userId,
-        ); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        );
         if (existing) {
           setReviewId(existing.id);
           setRating(existing.rating);
