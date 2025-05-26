@@ -29,7 +29,7 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
+  const [error, setError] = useState<string | null>( // eslint-disable-next-line @typescript-eslint/no-unused-vars
     null,
   ); /* eslint-disable-line */
 
@@ -57,7 +57,6 @@ export default function ReviewByEventPage() {
     }
   };
 
-  // Fetch average rating
   const fetchAverageRating = async () => {
     try {
       const avgRes = await fetch(
@@ -71,7 +70,6 @@ export default function ReviewByEventPage() {
     }
   };
 
-  // Fetch reviews
   const fetchReviews = async () => {
     try {
       const reviewsRes = await fetch(
