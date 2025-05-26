@@ -1,7 +1,6 @@
 "use client";
 
-/* eslint-disable-next-line */
-export default function ReviewActions({ review }: { review: any }) {
+export default function ReviewActions({ review }: { review: any }) { /* eslint-disable-line @typescript-eslint/no-explicit-any */
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 

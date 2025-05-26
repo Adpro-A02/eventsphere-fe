@@ -33,7 +33,6 @@ const Navbar: React.FC = () => {
 
   const NavRoute = [
     { id: 1, href: "/ads", name: "Manajemen Iklan" },
-    { id: 2, href: "/review", name: "Review" },
     { id: 3, href: "/event", name: "Event" },
     { id: 4, href: "/transaction", name: "Transaksi" },
     { id: 5, href: "/ticket", name: "Ticket" },
