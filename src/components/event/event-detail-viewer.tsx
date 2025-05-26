@@ -183,27 +183,6 @@ export default function EventDetailViewer({
               </Link>
             </div>
           )}
-
-          {/* Event Info for all users */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Event Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-700">Attendees</h4>
-                <p className="text-xl font-bold text-gray-600">
-                  {event.registered_count || 0} registered
-                </p>
-              </div>
-              {event.capacity && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-700">Capacity</h4>
-                  <p className="text-xl font-bold text-gray-600">
-                    {event.capacity} max
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </CardContent>
       </Card>{" "}
       {/* Ticket Purchase Modal */}
