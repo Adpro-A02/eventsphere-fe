@@ -1,7 +1,7 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import type { Event } from "@/lib/types";
+import type { Event, Transaction } from "@/lib/types";
 import Link from "next/link";
 import { format } from "date-fns";
 import {
@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
+import { TicketPurchaseModal } from "@/components/event/ticket-purchase-modal";
 
 interface EventDetailViewerProps {
   event: Event;
@@ -25,17 +26,42 @@ interface EventDetailViewerProps {
 export default function EventDetailViewer({
   event,
   eventId,
+  onEventUpdate,
 }: EventDetailViewerProps) {
-  const router = useRouter();
   const { isAuthenticated, isGuest } = useAuth();
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [transactionComplete, setTransactionComplete] = useState(false);
 
   const handleTicket = () => {
-    {
-      /* Tombol Beli tiket*/
+    setShowTicketModal(true);
+  };
+  const handleTransactionSuccess = (transaction: Transaction) => {
+    setTransactionComplete(true);
+
+    const ticketQuantity = calculateTicketQuantity(transaction);
+
+    if (onEventUpdate) {
+      const updatedEvent = {
+        ...event,
+        registered_count: (event.registered_count || 0) + ticketQuantity,
+      };
+      onEventUpdate(updatedEvent);
     }
-    router.push(
-      `/register?eventId=${eventId}&returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
-    );
+  };
+
+  const calculateTicketQuantity = (transaction: Transaction): number => {
+    const descriptionMatch =
+      transaction.description.match(/\((\d+) tickets?\)/);
+    if (descriptionMatch) {
+      return parseInt(descriptionMatch[1], 10);
+    }
+
+    if (event.basePrice && event.basePrice > 0) {
+      return Math.round(transaction.amount / event.basePrice);
+    }
+
+    // Default fallback
+    return 1;
   };
 
   const formatPrice = (price?: number) => {
@@ -63,7 +89,6 @@ export default function EventDetailViewer({
           Back to Events
         </Link>
       </div>
-
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <div>
@@ -131,14 +156,18 @@ export default function EventDetailViewer({
                         ? `${event.capacity - event.registered_count} spots remaining`
                         : "Quota available"}
                     </p>
-                  </div>
+                  </div>{" "}
                   <Button
                     size="lg"
                     onClick={handleTicket}
-                    disabled={!!isEventFull}
+                    disabled={!!isEventFull || transactionComplete}
                     className="min-w-[120px]"
                   >
-                    {isEventFull ? "Event Full" : "Buy Now"}
+                    {isEventFull
+                      ? "Event Full"
+                      : transactionComplete
+                        ? "Purchased"
+                        : "Buy Now"}
                   </Button>
                 </div>
               </div>
@@ -166,7 +195,17 @@ export default function EventDetailViewer({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card>{" "}
+      {/* Ticket Purchase Modal */}
+      {showTicketModal && (
+        <TicketPurchaseModal
+          event={event}
+          eventId={eventId}
+          isOpen={showTicketModal}
+          onClose={() => setShowTicketModal(false)}
+          onSuccess={handleTransactionSuccess}
+        />
+      )}
     </div>
   );
 }
