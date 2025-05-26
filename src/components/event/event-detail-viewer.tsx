@@ -146,7 +146,9 @@ export default function EventDetailViewer({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TicketIcon className="h-5 w-5 text-gray-600" />
-                    <h3 className="text-lg font-medium">Event Tickets</h3>
+                    <h3 className="text-lg font-medium text-gray-700">
+                      Event Tickets
+                    </h3>
                   </div>
                   <Link href={`/event/${eventId}/tickets`}>
                     <Button>
