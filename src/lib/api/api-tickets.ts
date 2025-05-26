@@ -95,10 +95,19 @@ export async function createTicket(
 // Delete a ticket
 export async function deleteTicket(ticketId: string): Promise<void> {
   try {
+    // Get auth token
+    const token = getToken();
+
+    if (!token) {
+      console.error("No authentication token found");
+      throw new Error("Authentication required. Please log in first.");
+    }
+
     const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       credentials: "include",
     });
@@ -106,10 +115,15 @@ export async function deleteTicket(ticketId: string): Promise<void> {
     if (!response.ok) {
       if (response.status === 409) {
         throw new Error("Cannot delete tickets that have been purchased");
+      } else if (response.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
+      } else if (response.status === 403) {
+        throw new Error("You don't have permission to delete this ticket.");
       }
       throw new Error(`Failed to delete ticket: ${response.statusText}`);
     }
   } catch (error) {
+    console.error("Error deleting ticket:", error);
     return handleApiError(error, "Failed to delete ticket");
   }
 }
@@ -117,23 +131,38 @@ export async function deleteTicket(ticketId: string): Promise<void> {
 // Update ticket status (for validation)
 export async function validateTicket(ticketId: string): Promise<Ticket> {
   try {
+    // Get auth token
+    const token = getToken();
+
+    if (!token) {
+      console.error("No authentication token found");
+      throw new Error("Authentication required. Please log in first.");
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/tickets/${ticketId}/validate`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       },
     );
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized. Please login again.");
+      } else if (response.status === 403) {
+        throw new Error("You don't have permission to validate this ticket.");
+      }
       throw new Error(`Failed to validate ticket: ${response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
+    console.error("Error validating ticket:", error);
     return handleApiError(error, "Failed to validate ticket");
   }
 }

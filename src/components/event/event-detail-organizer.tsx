@@ -199,7 +199,9 @@ export default function EventDetailOrganizer({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <TicketIcon className="h-5 w-5 text-gray-600" />
-                  <h3 className="text-lg font-medium">Ticket Management</h3>
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Ticket Management
+                  </h3>
                 </div>
                 <Link href={`/event/${event.id}/tickets`}>
                   <Button>
