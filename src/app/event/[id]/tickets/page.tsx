@@ -292,7 +292,6 @@ export default function EventTicketsPage() {
                       <SelectContent>
                         <SelectItem value="REGULAR">Regular</SelectItem>
                         <SelectItem value="VIP">VIP</SelectItem>
-                        <SelectItem value="STANDARD">Standard</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
