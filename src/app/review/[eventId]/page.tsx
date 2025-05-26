@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +29,9 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>( null,); /* eslint-disable-line */
+  const [error, setError] = useState<string | null>(
+    null,
+  ); /* eslint-disable-line */
 
   const parseToken = () => {
     const token = localStorage.getItem("token");
@@ -43,9 +45,10 @@ export default function ReviewByEventPage() {
     }
   };
 
-  const fetchEvent = async () => {
+  // Wrap functions in useCallback to prevent dependency cycle
+  const fetchEvent = useCallback(async () => {
     try {
-      const res = await fetch(`http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`);
+      const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
       if (!res.ok) throw new Error("Event tidak ditemukan");
       const json = await res.json();
       setEvent(json);
@@ -53,12 +56,12 @@ export default function ReviewByEventPage() {
       setError("Gagal memuat data event.");
       setEvent(null);
     }
-  };
+  }, [eventId, setEvent, setError]);
 
-  const fetchAverageRating = async () => {
+  const fetchAverageRating = useCallback(async () => {
     try {
       const avgRes = await fetch(
-`https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}/average`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}/average`,
       );
       const avgJson = await avgRes.json();
       setAverageRating(avgJson.data?.averageRating || null);
@@ -66,9 +69,9 @@ export default function ReviewByEventPage() {
       console.error("Error fetching average rating:", err);
       setAverageRating(null);
     }
-  };
+  }, [eventId, setAverageRating]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const reviewsRes = await fetch(
         `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}`,
@@ -79,7 +82,7 @@ export default function ReviewByEventPage() {
       console.error("Error fetching reviews:", err);
       setReviews([]);
     }
-  };
+  }, [eventId, setReviews]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,14 +105,14 @@ export default function ReviewByEventPage() {
     };
 
     if (eventId) fetchData();
-  }, [eventId]);
+  }, [eventId, fetchEvent]); // Add fetchEvent to dependencies
 
   useEffect(() => {
     if (event && event.status === "COMPLETED") {
       fetchReviews();
       fetchAverageRating();
     }
-  }, [event]);
+  }, [event, fetchReviews, fetchAverageRating]); // Add missing dependencies
 
   const myReview = reviews.find((r) => r.userId === currentUserId);
 

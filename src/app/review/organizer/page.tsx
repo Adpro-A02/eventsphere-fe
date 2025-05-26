@@ -28,7 +28,7 @@ export default function OrganizerEventsPage() {
     const fetchOrganizerEvents = async () => {
       try {
         const res = await fetch(
-          "http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/organizer/my-events",
+          "http://localhost:8081api/events/organizer/my-events",
           {
             headers: {
               Authorization: `Bearer ${token}`,

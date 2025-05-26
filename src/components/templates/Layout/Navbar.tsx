@@ -38,7 +38,6 @@ const Navbar: React.FC = () => {
     { id: 1, href: "/ads", name: "Manajemen Iklan" },
     { id: 3, href: "/event", name: "Event" },
     { id: 4, href: "/transaction", name: "Transaksi" },
-    { id: 5, href: "/ticket", name: "Ticket" },
     { id: 6, href: "/admin", name: "Admin", adminOnly: true },
   ];
   const NavRoute = fullNavRoute.filter((route) => !route.adminOnly || isAdmin);

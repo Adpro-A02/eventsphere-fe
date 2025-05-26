@@ -10,6 +10,7 @@ import {
   MapPinIcon,
   UserIcon,
   TagIcon,
+  TicketIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,6 @@ export default function EventDetailViewer({
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [transactionComplete, setTransactionComplete] = useState(false);
 
-  const handleTicket = () => {
-    setShowTicketModal(true);
-  };
   const handleTransactionSuccess = (transaction: Transaction) => {
     setTransactionComplete(true);
 
@@ -141,11 +139,34 @@ export default function EventDetailViewer({
             </div>
           </div>
 
-          {/* BUY Ticket */}
+          {/* View Tickets Button */}
+          {event.status === "PUBLISHED" && (
+            <div className="border-t pt-6">
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TicketIcon className="h-5 w-5 text-gray-600" />
+                    <h3 className="text-lg font-medium">Event Tickets</h3>
+                  </div>
+                  <Link href={`/event/${eventId}/tickets`}>
+                    <Button>
+                      <TicketIcon className="h-4 w-4 mr-2" />
+                      View Tickets
+                    </Button>
+                  </Link>
+                </div>
+                <p className="mt-2 text-gray-600">
+                  View available tickets and purchase options for this event
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Legacy Quick Purchase - keep for backward compatibility */}
           {event.status === "PUBLISHED" && isAuthenticated && !isGuest && (
             <div className="border-t pt-6">
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Purchase Ticket</h3>
+                <h3 className="text-lg font-medium mb-2">Quick Purchase</h3>
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <p className="text-2xl font-bold text-green-600">
@@ -156,10 +177,10 @@ export default function EventDetailViewer({
                         ? `${event.capacity - event.registered_count} spots remaining`
                         : "Quota available"}
                     </p>
-                  </div>{" "}
+                  </div>
                   <Button
                     size="lg"
-                    onClick={handleTicket}
+                    onClick={() => setShowTicketModal(true)}
                     disabled={!!isEventFull || transactionComplete}
                     className="min-w-[120px]"
                   >
@@ -174,7 +195,7 @@ export default function EventDetailViewer({
             </div>
           )}
 
-          {event.status as string === "COMPLETED" && ( /* eslint-disable @typescript-eslint/no-wrapper-object-types */ 
+          {event.status === "COMPLETED" && (
             <div className="border-t pt-6 max-w-3xl mx-auto">
               <Link href={`/review/${eventId}`}>
                 <Button variant="outline" size="lg" className="w-full">
@@ -184,7 +205,8 @@ export default function EventDetailViewer({
             </div>
           )}
         </CardContent>
-      </Card>{" "}
+      </Card>
+
       {/* Ticket Purchase Modal */}
       {showTicketModal && (
         <TicketPurchaseModal
