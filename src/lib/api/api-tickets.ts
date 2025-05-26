@@ -28,7 +28,9 @@ export async function getTicketsByEventId(eventId: string): Promise<Ticket[]> {
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch tickets: ${response.status} ${response.statusText}`);
+      console.error(
+        `Failed to fetch tickets: ${response.status} ${response.statusText}`,
+      );
       throw new Error(`Failed to fetch tickets: ${response.statusText}`);
     }
 
@@ -42,23 +44,25 @@ export async function getTicketsByEventId(eventId: string): Promise<Ticket[]> {
 }
 
 // Create a new ticket
-export async function createTicket(ticket: Omit<Ticket, "id">): Promise<Ticket> {
+export async function createTicket(
+  ticket: Omit<Ticket, "id">,
+): Promise<Ticket> {
   try {
     console.log("Creating ticket with data:", ticket);
-    
+
     // Get auth token using the same method as in apiEvent.ts
     const token = getToken();
-    
+
     if (!token) {
       console.error("No authentication token found");
       throw new Error("Authentication required. Please log in first.");
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/tickets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       credentials: "include",
       body: JSON.stringify(ticket),
@@ -67,13 +71,15 @@ export async function createTicket(ticket: Omit<Ticket, "id">): Promise<Ticket> 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to create ticket: ${response.status} ${errorText}`);
-      
+
       if (response.status === 401) {
         throw new Error("Your session has expired. Please log in again.");
       } else if (response.status === 403) {
         throw new Error("You don't have permission to create tickets.");
       } else {
-        throw new Error(`Failed to create ticket: ${errorText || response.statusText}`);
+        throw new Error(
+          `Failed to create ticket: ${errorText || response.statusText}`,
+        );
       }
     }
 
@@ -111,13 +117,16 @@ export async function deleteTicket(ticketId: string): Promise<void> {
 // Update ticket status (for validation)
 export async function validateTicket(ticketId: string): Promise<Ticket> {
   try {
-    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/validate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${API_BASE_URL}/tickets/${ticketId}/validate`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
       },
-      credentials: "include",
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to validate ticket: ${response.statusText}`);

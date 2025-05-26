@@ -1,22 +1,27 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Ticket, getTicketsByEventId, deleteTicket, validateTicket } from "@/lib/api/api-tickets";
+import {
+  Ticket,
+  getTicketsByEventId,
+  deleteTicket,
+  validateTicket,
+} from "@/lib/api/api-tickets";
 import { UserRole } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  AlertCircle, 
-  TicketIcon, 
-  Trash2Icon, 
+import {
+  AlertCircle,
+  TicketIcon,
+  Trash2Icon,
   CheckSquareIcon,
-  PlusIcon
+  PlusIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -33,7 +38,10 @@ interface EventTicketsListProps {
   onTicketChange?: () => void;
 }
 
-export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListProps) {
+export function EventTicketsList({
+  eventId,
+  onTicketChange,
+}: EventTicketsListProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -42,7 +50,7 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
   const [ticketToDelete, setTicketToDelete] = useState<string | null>(null);
   const [ticketToValidate, setTicketToValidate] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  
+
   // Check user roles
   const isAdmin = user?.role === UserRole.Admin;
   const isOrganizer = user?.role === UserRole.Organizer;
@@ -78,7 +86,7 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
 
   const handleDeleteTicket = async () => {
     if (!ticketToDelete) return;
-    
+
     try {
       await deleteTicket(ticketToDelete);
       toast({
@@ -88,7 +96,8 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
       fetchTickets();
       if (onTicketChange) onTicketChange();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to delete ticket";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete ticket";
       toast({
         title: "Error",
         description: errorMessage,
@@ -101,7 +110,7 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
 
   const handleValidateTicket = async () => {
     if (!ticketToValidate) return;
-    
+
     try {
       await validateTicket(ticketToValidate);
       toast({
@@ -111,7 +120,8 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
       fetchTickets();
       if (onTicketChange) onTicketChange();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to validate ticket";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to validate ticket";
       toast({
         title: "Error",
         description: errorMessage,
@@ -175,7 +185,7 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
           <TicketIcon size={20} />
           Event Tickets
         </h3>
-        
+
         {canCreateTicket && (
           <Button onClick={() => setShowCreateModal(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />
@@ -183,11 +193,13 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
           </Button>
         )}
       </div>
-      
+
       {tickets.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">No tickets available for this event yet.</p>
+            <p className="text-center text-gray-500">
+              No tickets available for this event yet.
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -196,8 +208,14 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
             <Card key={ticket.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{ticket.type} Ticket</CardTitle>
-                  <Badge variant={ticket.status === "AVAILABLE" ? "default" : "outline"}>
+                  <CardTitle className="text-lg">
+                    {ticket.type} Ticket
+                  </CardTitle>
+                  <Badge
+                    variant={
+                      ticket.status === "AVAILABLE" ? "default" : "outline"
+                    }
+                  >
                     {ticket.status}
                   </Badge>
                 </div>
@@ -205,30 +223,37 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-500">{ticket.description}</p>
+                    <p className="text-sm text-gray-500">
+                      {ticket.description}
+                    </p>
                   </div>
-                  
+
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span>Price:</span>
-                      <span className="font-medium">{formatPrice(ticket.price)}</span>
+                      <span className="font-medium">
+                        {formatPrice(ticket.price)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Available:</span>
-                      <span className="font-medium">{ticket.remainingQuota} / {ticket.quota}</span>
+                      <span className="font-medium">
+                        {ticket.remainingQuota} / {ticket.quota}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Sale period:</span>
                       <span className="font-medium">
-                        {formatDate(ticket.saleStart)} - {formatDate(ticket.saleEnd)}
+                        {formatDate(ticket.saleStart)} -{" "}
+                        {formatDate(ticket.saleEnd)}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end gap-2">
                     {canValidateTicket && ticket.status !== "USED" && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => setTicketToValidate(ticket.id)}
                       >
@@ -236,17 +261,18 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
                         Validate
                       </Button>
                     )}
-                    
-                    {canDeleteTicket && ticket.remainingQuota === ticket.quota && (
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => setTicketToDelete(ticket.id)}
-                      >
-                        <Trash2Icon className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    )}
+
+                    {canDeleteTicket &&
+                      ticket.remainingQuota === ticket.quota && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setTicketToDelete(ticket.id)}
+                        >
+                          <Trash2Icon className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      )}
                   </div>
                 </div>
               </CardContent>
@@ -256,40 +282,52 @@ export function EventTicketsList({ eventId, onTicketChange }: EventTicketsListPr
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!ticketToDelete} onOpenChange={() => setTicketToDelete(null)}>
+      <AlertDialog
+        open={!!ticketToDelete}
+        onOpenChange={() => setTicketToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the ticket.
+              This action cannot be undone. This will permanently delete the
+              ticket.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTicket}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteTicket}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Validate Confirmation Dialog */}
-      <AlertDialog open={!!ticketToValidate} onOpenChange={() => setTicketToValidate(null)}>
+      <AlertDialog
+        open={!!ticketToValidate}
+        onOpenChange={() => setTicketToValidate(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Validate Ticket</AlertDialogTitle>
             <AlertDialogDescription>
-              This will mark the ticket as USED. Are you sure you want to continue?
+              This will mark the ticket as USED. Are you sure you want to
+              continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleValidateTicket}>Validate</AlertDialogAction>
+            <AlertDialogAction onClick={handleValidateTicket}>
+              Validate
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Create Ticket Modal */}
       {showCreateModal && (
-        <CreateTicketModal 
+        <CreateTicketModal
           eventId={eventId}
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}

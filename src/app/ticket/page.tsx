@@ -9,12 +9,12 @@ import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { TicketList } from "@/components/ticket/ticket-list";
 import { CreateTicketModal } from "@/components/event/create-ticket-modal";
@@ -25,14 +25,16 @@ export default function TicketsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const eventParam = searchParams.get('event');
-  
+  const eventParam = searchParams.get("event");
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string>(eventParam || "");
+  const [selectedEventId, setSelectedEventId] = useState<string>(
+    eventParam || "",
+  );
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  
+
   // Check user roles
   // const isAdmin = user?.role === UserRole.Admin; // Used for reference
   const isOrganizer = user?.role === UserRole.Organizer;
@@ -90,7 +92,9 @@ export default function TicketsPage() {
   const handleTicketCreated = () => {
     // Refetch tickets after a new one is created
     if (selectedEventId) {
-      getTicketsByEventId(selectedEventId).then(setTickets).catch(console.error);
+      getTicketsByEventId(selectedEventId)
+        .then(setTickets)
+        .catch(console.error);
     }
   };
 
@@ -101,7 +105,7 @@ export default function TicketsPage() {
           <TicketIcon className="h-8 w-8" />
           Tickets Management
         </h1>
-        
+
         {canCreateTicket && selectedEventId && (
           <Button onClick={() => setShowCreateModal(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />
@@ -109,7 +113,7 @@ export default function TicketsPage() {
           </Button>
         )}
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Filter Tickets</CardTitle>
@@ -117,7 +121,9 @@ export default function TicketsPage() {
         <CardContent>
           <div className="grid gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Select Event</label>
+              <label className="block text-sm font-medium mb-1">
+                Select Event
+              </label>
               <Select onValueChange={handleEventChange} value={selectedEventId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an event" />
@@ -134,25 +140,27 @@ export default function TicketsPage() {
           </div>
         </CardContent>
       </Card>
-      
+
       {selectedEventId ? (
-        <TicketList 
-          tickets={tickets} 
-          loading={loading} 
+        <TicketList
+          tickets={tickets}
+          loading={loading}
           onTicketChange={handleTicketCreated}
-          selectedEvent={events.find(e => e.id === selectedEventId)}
+          selectedEvent={events.find((e) => e.id === selectedEventId)}
         />
       ) : (
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-gray-500">Please select an event to view tickets</p>
+            <p className="text-gray-500">
+              Please select an event to view tickets
+            </p>
           </CardContent>
         </Card>
       )}
-      
+
       {/* Create Ticket Modal */}
       {showCreateModal && (
-        <CreateTicketModal 
+        <CreateTicketModal
           eventId={selectedEventId}
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}

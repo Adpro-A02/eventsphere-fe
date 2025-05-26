@@ -29,7 +29,8 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null); /* eslint-disable-line */
+  /* eslint-disable-next-line */
+  const [error, setError] = useState<string | null>(null);
 
   const parseToken = () => {
     const token = localStorage.getItem("token");
@@ -247,7 +248,7 @@ export default function ReviewByEventPage() {
               </p>
             </div>
           ))
-        }
+        )}
       </CardContent>
     </Card>
   );

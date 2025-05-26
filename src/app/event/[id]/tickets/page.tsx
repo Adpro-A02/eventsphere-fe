@@ -2,7 +2,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/lib/types";
-import { Ticket, getTicketsByEventId, createTicket } from "@/lib/api/api-tickets";
+import {
+  Ticket,
+  getTicketsByEventId,
+  createTicket,
+} from "@/lib/api/api-tickets";
 import { getEventById } from "@/lib/api/api-events";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -33,7 +37,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Ticket creation form schema
 const ticketFormSchema = z.object({
@@ -42,8 +52,10 @@ const ticketFormSchema = z.object({
   quota: z.coerce.number().min(1, "Quota must be at least 1"),
   description: z.string().min(5, "Description must be at least 5 characters"),
   saleStart: z.coerce.number().min(1, "Sale start date is required"),
-  saleEnd: z.coerce.number().min(1, "Sale end date is required")
-    .refine(val => val > Date.now(), "Sale end must be in the future")
+  saleEnd: z.coerce
+    .number()
+    .min(1, "Sale end date is required")
+    .refine((val) => val > Date.now(), "Sale end must be in the future"),
 });
 
 type TicketFormData = z.infer<typeof ticketFormSchema>;
@@ -53,14 +65,14 @@ export default function EventTicketsPage() {
   const { toast } = useToast();
   const params = useParams();
   const eventId = params.id as string;
-  
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Check user roles
   const isAdmin = user?.role === UserRole.Admin;
   const isOrganizer = user?.role === UserRole.Organizer;
@@ -75,8 +87,8 @@ export default function EventTicketsPage() {
       quota: 1,
       description: "",
       saleStart: Date.now(),
-      saleEnd: Date.now() + 7 * 24 * 60 * 60 * 1000 // One week in the future
-    }
+      saleEnd: Date.now() + 7 * 24 * 60 * 60 * 1000, // One week in the future
+    },
   });
 
   // Fetch event details and tickets
@@ -85,12 +97,12 @@ export default function EventTicketsPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Only fetch the specific event by ID
         const eventData = await getEventById(eventId);
         console.log("Event data:", eventData);
         setEvent(eventData);
-        
+
         // Fetch tickets for this event
         const ticketsData = await getTicketsByEventId(eventId);
         console.log("Tickets data:", ticketsData);
@@ -116,7 +128,7 @@ export default function EventTicketsPage() {
   // Handle ticket creation
   const handleTicketCreation = async (data: TicketFormData) => {
     if (!eventId) return;
-    
+
     // Check if user is logged in and is an organizer
     if (!user) {
       setError("You must be logged in to create tickets");
@@ -127,7 +139,7 @@ export default function EventTicketsPage() {
       });
       return;
     }
-    
+
     if (!isOrganizer && !isAdmin) {
       setError("Only organizers can create tickets");
       toast({
@@ -137,13 +149,13 @@ export default function EventTicketsPage() {
       });
       return;
     }
-    
+
     setIsCreating(true);
     setError(null);
-    
+
     try {
       console.log("Creating ticket with data:", { ...data, eventId });
-      
+
       const newTicket = await createTicket({
         eventId,
         type: data.type,
@@ -153,36 +165,39 @@ export default function EventTicketsPage() {
         saleStart: data.saleStart,
         saleEnd: data.saleEnd,
         status: "AVAILABLE",
-        remainingQuota: data.quota
+        remainingQuota: data.quota,
       });
-      
+
       console.log("Created ticket:", newTicket);
-      
+
       // Update the tickets list
-      setTickets(prev => [...prev, newTicket]);
-      
+      setTickets((prev) => [...prev, newTicket]);
+
       toast({
         title: "Success",
         description: "Ticket created successfully",
       });
-      
+
       setShowCreateModal(false);
       form.reset();
     } catch (error) {
       console.error("Failed to create ticket:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to create ticket. Please check your inputs and try again.";
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create ticket. Please check your inputs and try again.";
+
       // If session expired, redirect to login
-      if (errorMessage.includes("session has expired") || 
-          errorMessage.includes("Authentication required")) {
+      if (
+        errorMessage.includes("session has expired") ||
+        errorMessage.includes("Authentication required")
+      ) {
         toast({
           title: "Authentication Error",
           description: "Your session has expired. Please log in again.",
           variant: "destructive",
         });
-        
+
         // Optional: Redirect to login page
         // router.push('/login');
       } else {
@@ -199,7 +214,7 @@ export default function EventTicketsPage() {
   };
 
   // Handle date input changes
-  const handleDateChange = (name: 'saleStart' | 'saleEnd', value: string) => {
+  const handleDateChange = (name: "saleStart" | "saleEnd", value: string) => {
     const timestamp = new Date(value).getTime();
     form.setValue(name, timestamp);
   };
@@ -215,13 +230,13 @@ export default function EventTicketsPage() {
           Back to Event
         </Link>
       </div>
-      
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <TicketIcon className="h-8 w-8" />
-          {event ? `Tickets for ${event.title}` : 'Event Tickets'}
+          {event ? `Tickets for ${event.title}` : "Event Tickets"}
         </h1>
-        
+
         {canCreateTicket && (
           <Button onClick={() => setShowCreateModal(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />
@@ -229,39 +244,46 @@ export default function EventTicketsPage() {
           </Button>
         )}
       </div>
-      
+
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
-      <TicketList 
-        tickets={tickets} 
-        loading={loading} 
+
+      <TicketList
+        tickets={tickets}
+        loading={loading}
         onTicketChange={() => getTicketsByEventId(eventId).then(setTickets)}
         selectedEvent={event}
       />
-      
+
       {/* Create Ticket Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Create New Ticket</DialogTitle>
             <DialogDescription>
-              Create a new ticket for this event. Attendees will be able to view and purchase it.
+              Create a new ticket for this event. Attendees will be able to view
+              and purchase it.
             </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleTicketCreation)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleTicketCreation)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="type"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ticket Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a ticket type" />
@@ -285,12 +307,7 @@ export default function EventTicketsPage() {
                   <FormItem>
                     <FormLabel>Price</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        placeholder="0"
-                        {...field}
-                      />
+                      <Input type="number" min={0} placeholder="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -304,12 +321,7 @@ export default function EventTicketsPage() {
                   <FormItem>
                     <FormLabel>Quota</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        placeholder="1"
-                        {...field}
-                      />
+                      <Input type="number" min={1} placeholder="1" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -344,7 +356,9 @@ export default function EventTicketsPage() {
                         <Input
                           type="datetime-local"
                           defaultValue={new Date().toISOString().slice(0, 16)}
-                          onChange={(e) => handleDateChange('saleStart', e.target.value)}
+                          onChange={(e) =>
+                            handleDateChange("saleStart", e.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -361,8 +375,14 @@ export default function EventTicketsPage() {
                       <FormControl>
                         <Input
                           type="datetime-local"
-                          defaultValue={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                          onChange={(e) => handleDateChange('saleEnd', e.target.value)}
+                          defaultValue={new Date(
+                            Date.now() + 7 * 24 * 60 * 60 * 1000,
+                          )
+                            .toISOString()
+                            .slice(0, 16)}
+                          onChange={(e) =>
+                            handleDateChange("saleEnd", e.target.value)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -378,10 +398,10 @@ export default function EventTicketsPage() {
               )}
 
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowCreateModal(false)} 
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateModal(false)}
                   disabled={isCreating}
                 >
                   Cancel

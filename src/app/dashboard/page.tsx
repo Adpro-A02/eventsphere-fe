@@ -94,7 +94,7 @@ export default function DashboardPage() {
                         Error loading balance
                       </span>
                     ) : (
-                      `$${balanceData?.amount?.toLocaleString() || "0"}`
+                      `Rp ${balanceData?.amount?.toLocaleString() || "0"}`
                     )}
                   </span>
                 </div>

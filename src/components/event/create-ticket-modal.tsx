@@ -26,7 +26,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Validation schema for ticket creation
 const ticketCreationSchema = z.object({
@@ -35,8 +41,10 @@ const ticketCreationSchema = z.object({
   quota: z.coerce.number().min(1, "Quota must be at least 1"),
   description: z.string().min(5, "Description must be at least 5 characters"),
   saleStart: z.coerce.number().min(1, "Sale start date is required"),
-  saleEnd: z.coerce.number().min(1, "Sale end date is required")
-    .refine(val => val > Date.now(), "Sale end must be in the future")
+  saleEnd: z.coerce
+    .number()
+    .min(1, "Sale end date is required")
+    .refine((val) => val > Date.now(), "Sale end must be in the future"),
 });
 
 type TicketCreationFormData = z.infer<typeof ticketCreationSchema>;
@@ -72,8 +80,8 @@ export function CreateTicketModal({
       quota: 1,
       description: "",
       saleStart: Date.now(),
-      saleEnd: tomorrow.getTime()
-    }
+      saleEnd: tomorrow.getTime(),
+    },
   });
 
   const onSubmit = async (data: TicketCreationFormData) => {
@@ -83,7 +91,7 @@ export function CreateTicketModal({
     try {
       await createTicket({
         eventId,
-        ...data
+        ...data,
       });
 
       toast({
@@ -94,7 +102,8 @@ export function CreateTicketModal({
       onTicketCreated();
       onClose();
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create ticket";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create ticket";
       setError(errorMessage);
       toast({
         title: "Error",
@@ -106,7 +115,7 @@ export function CreateTicketModal({
     }
   };
 
-  const handleDateChange = (name: 'saleStart' | 'saleEnd', value: string) => {
+  const handleDateChange = (name: "saleStart" | "saleEnd", value: string) => {
     const timestamp = new Date(value).getTime();
     form.setValue(name, timestamp);
   };
@@ -117,7 +126,8 @@ export function CreateTicketModal({
         <DialogHeader>
           <DialogTitle>Create New Ticket</DialogTitle>
           <DialogDescription>
-            Create a new ticket for this event. Attendees will be able to view and purchase it.
+            Create a new ticket for this event. Attendees will be able to view
+            and purchase it.
           </DialogDescription>
         </DialogHeader>
 
@@ -129,7 +139,10 @@ export function CreateTicketModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Ticket Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a ticket type" />
@@ -152,12 +165,7 @@ export function CreateTicketModal({
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      placeholder="0"
-                      {...field}
-                    />
+                    <Input type="number" min={0} placeholder="0" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -171,12 +179,7 @@ export function CreateTicketModal({
                 <FormItem>
                   <FormLabel>Quota</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="1"
-                      {...field}
-                    />
+                    <Input type="number" min={1} placeholder="1" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -211,7 +214,9 @@ export function CreateTicketModal({
                       <Input
                         type="datetime-local"
                         defaultValue={currentDate}
-                        onChange={(e) => handleDateChange('saleStart', e.target.value)}
+                        onChange={(e) =>
+                          handleDateChange("saleStart", e.target.value)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -229,7 +234,9 @@ export function CreateTicketModal({
                       <Input
                         type="datetime-local"
                         defaultValue={tomorrowString}
-                        onChange={(e) => handleDateChange('saleEnd', e.target.value)}
+                        onChange={(e) =>
+                          handleDateChange("saleEnd", e.target.value)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -245,7 +252,12 @@ export function CreateTicketModal({
             )}
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

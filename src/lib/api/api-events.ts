@@ -20,12 +20,12 @@ export async function getAllEvents(): Promise<Event[]> {
 
     const data = await response.json();
     console.log("Received events data:", data);
-    
+
     // Check if the API returns data in a wrapper object
     if (data.data) {
       return data.data;
     }
-    
+
     return data;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -52,12 +52,12 @@ export async function getEventById(eventId: string): Promise<Event | null> {
 
     const data = await response.json();
     console.log("Received event data:", data);
-    
+
     // Check if the API returns data in a wrapper object
     if (data.data) {
       return data.data;
     }
-    
+
     return data;
   } catch (error) {
     console.error(`Error fetching event ${eventId}:`, error);
