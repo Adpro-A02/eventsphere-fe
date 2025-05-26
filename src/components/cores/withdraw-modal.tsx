@@ -32,8 +32,8 @@ import { useToast } from "@/components/ui/use-toast";
 const withdrawSchema = z.object({
   amount: z
     .number()
-    .min(1, "Amount must be at least $1")
-    .max(10000, "Maximum amount is $10,000"),
+    .min(1, "Amount must be at least Rp 1")
+    .max(5000000, "Maximum amount is Rp 5,000,000"),
   description: z
     .string()
     .min(1, "Please provide a description")
@@ -123,7 +123,7 @@ export default function WithdrawModal({
         <DialogHeader>
           <DialogTitle>Withdraw Funds</DialogTitle>
           <DialogDescription>
-            Withdraw funds from your account balance. Available balance: $
+            Withdraw funds from your account balance. Available balance: Rp
             {currentBalance.toLocaleString()}
           </DialogDescription>
         </DialogHeader>
@@ -134,7 +134,7 @@ export default function WithdrawModal({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Amount (Rp)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
