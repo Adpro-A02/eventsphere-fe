@@ -19,6 +19,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { updateEvent } from "@/lib/event-api";
+import { AxiosError } from "axios";
 
 interface EditEventFormProps {
   initialData: {
@@ -145,19 +146,13 @@ export function EditEventForm({ initialData }: EditEventFormProps) {
       });
 
       router.push("/event");
-    } catch (error: any) {
-      /* eslint-disable-line @typescript-eslint/no-explicit-any */
-      console.error("Error updating event:", error);
+    } catch (error: unknown) {
+      console.error("Error creating event:", error);
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong.",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -297,4 +292,15 @@ export function EditEventForm({ initialData }: EditEventFormProps) {
       </div>
     </form>
   );
+}
+function getErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError && error.response?.data?.message) {
+    return error.response.data.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Something went wrong.";
 }

@@ -194,7 +194,7 @@ export default function EventDetailOrganizer({
 
           {/* Kalo ada yang kelebihan kurangin */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Quota</h3>
+            <h3 className="text-lg font-medium mb-4">Management Event</h3>
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
@@ -208,7 +208,6 @@ export default function EventDetailOrganizer({
               >
                 Analytics
               </Button>
-              <Button variant="outline">Export Data</Button>
             </div>
           </div>
         </CardContent>
