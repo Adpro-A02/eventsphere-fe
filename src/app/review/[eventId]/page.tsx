@@ -29,7 +29,9 @@ export default function ReviewByEventPage() {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null,); /* eslint-disable-line */
+  const [error, setError] = useState<string | null>(
+    null,
+  ); /* eslint-disable-line */
 
   const parseToken = () => {
     const token = localStorage.getItem("token");
@@ -50,7 +52,7 @@ export default function ReviewByEventPage() {
       if (!res.ok) throw new Error("Event tidak ditemukan");
       const json = await res.json();
       setEvent(json);
-    } catch  { /* eslint-disable-line */
+    } catch {
       setError("Gagal memuat data event.");
       setEvent(null);
     }

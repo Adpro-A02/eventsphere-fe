@@ -64,11 +64,11 @@ export default function DashboardPage() {
             )}
 
             {/* Tombol untuk Organizer, pastikan user.eventId ada */}
-          {user?.role === "Organizer" && (
-        <Button asChild variant="secondary">
-          <Link href="/review/organizer">Manage My Event Reviews</Link>
-        </Button>
-      )}
+            {user?.role === "Organizer" && (
+              <Button asChild variant="secondary">
+                <Link href="/review/organizer">Manage My Event Reviews</Link>
+              </Button>
+            )}
 
             <Button variant="destructive" onClick={handleLogout}>
               Logout

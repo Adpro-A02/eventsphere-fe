@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircleIcon, XCircleIcon } from "lucide-react";
-import { getToken } from "@/lib/auth-storage";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { publishEvent, cancelEvent, completeEvent } from "@/lib/event-api"; // pastikan path-nya benar
 
 interface EventActionsProps {
   eventId: string;
@@ -20,22 +20,13 @@ export function EventActions({ eventId, status }: EventActionsProps) {
     action: "publish" | "cancel" | "complete",
   ) => {
     setIsLoading(true);
-
     try {
-      const token = getToken();
-      const response = await fetch(
-        `http://localhost:8081/api/events/${eventId}/${action}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${action} event`);
+      if (action === "publish") {
+        await publishEvent(eventId);
+      } else if (action === "cancel") {
+        await cancelEvent(eventId);
+      } else if (action === "complete") {
+        await completeEvent(eventId);
       }
 
       toast({
@@ -43,7 +34,6 @@ export function EventActions({ eventId, status }: EventActionsProps) {
         description: `Event has been ${action}ed successfully.`,
       });
 
-      // Refresh the page to show updated status
       router.refresh();
     } catch (err) {
       console.error(`Error ${action}ing event:`, err);

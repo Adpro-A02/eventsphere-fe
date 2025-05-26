@@ -46,12 +46,15 @@ export default function FlaggedReviewPage() {
     setDeletingId(reviewId);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8080/api/reviews/delete/${reviewId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `http://localhost:8080/api/reviews/delete/${reviewId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       if (!res.ok) {
         alert("Gagal menghapus review.");
       } else {
@@ -103,7 +106,9 @@ export default function FlaggedReviewPage() {
                   </p>
                   <p>
                     <strong>Status:</strong>{" "}
-                    <span className="text-red-600 font-semibold">{review.status}</span>
+                    <span className="text-red-600 font-semibold">
+                      {review.status}
+                    </span>
                   </p>
                   <Button
                     variant="destructive"

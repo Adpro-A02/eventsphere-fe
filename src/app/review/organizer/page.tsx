@@ -28,11 +28,14 @@ export default function OrganizerEventsPage() {
 
     const fetchOrganizerEvents = async () => {
       try {
-        const res = await fetch("http://localhost:8081/api/events/organizer/my-events", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          "http://localhost:8081/api/events/organizer/my-events",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (!res.ok) throw new Error("Gagal mengambil data event");
 

@@ -87,9 +87,11 @@ export default function CreateReviewPage() {
       if (res.ok) {
         router.push(`/review/${eventId}`);
       } else {
-        alert("Gagal membuat review. Anda sudah pernah membuat review untuk event ini.");
+        alert(
+          "Gagal membuat review. Anda sudah pernah membuat review untuk event ini.",
+        );
       }
-    } catch  {
+    } catch {
       alert("Terjadi kesalahan saat membuat review.");
       console.error();
     }
