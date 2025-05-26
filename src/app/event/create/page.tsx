@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EventForm } from "@/components/event-form";
+import { CreateEventForm } from "@/components/event/create-event-form";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
@@ -32,7 +32,7 @@ export default function CreateEventPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EventForm />
+          <CreateEventForm />
         </CardContent>
       </Card>
     </div>

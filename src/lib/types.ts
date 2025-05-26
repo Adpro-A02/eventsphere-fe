@@ -50,21 +50,20 @@ export interface Event {
   description: string;
   location: string;
   basePrice: number;
-  status: "DRAFT" | "PUBLISHED" | "CANCELLED"; // Backend menggunakan uppercase
-  event_date: string; // Backend menggunakan event_date, bukan date terpisah
-  user_id: string; // Backend menggunakan user_id, bukan organizer_id
-  // Optional fields yang mungkin ada
+  status: "DRAFT" | "PUBLISHED" | "CANCELLED";
+  event_date: string;
+  user_id: string;
+
   organizer_name?: string;
   capacity?: number;
   registered_count?: number;
   created_at?: string;
   updated_at?: string;
   image_url?: string;
-  time?: string; // Derived dari event_date
-  date?: string; // Derived dari event_date
+  time?: string;
+  date?: string;
 }
 
-// Validation schemas
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
@@ -93,10 +92,15 @@ export const updateProfileSchema = z
 export const eventSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  date: z.string().min(1, "Date is required"),
-  time: z.string().min(1, "Time is required"),
   location: z.string().min(3, "Location must be at least 3 characters"),
-  capacity: z.number().min(1, "Capacity must be at least 1"),
+  event_date: z.union([z.string(), z.date()]).transform((val) => {
+    const date = typeof val === "string" ? new Date(val) : val;
+    return date.toISOString().slice(0, 19);
+  }),
+  basePrice: z
+    .number({ invalid_type_error: "Base price must be a number" })
+    .nonnegative("Base price cannot be negative")
+    .optional(),
 });
 
 export interface AddFundsRequest {
@@ -112,7 +116,10 @@ export interface WithdrawFundsRequest {
 }
 
 export interface BalanceResponse {
-  balance: number;
+  id: string;
+  user_id: string;
+  amount: number;
+  updated_at: string;
 }
 
 export const addFundsSchema = z.object({

@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
   type ReactNode,
 } from "react";
 import type { UserResponse, UserRole } from "@/lib/types";
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isOrganizer = (): boolean => hasRole("Organizer");
   const isAttendee = (): boolean => hasRole("Attendee");
 
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     if (!mounted || typeof window === "undefined") return;
 
     try {
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
     }
-  };
+  }, [mounted]);
 
   useEffect(() => {
     setMounted(true);
@@ -121,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-  }, [mounted]);
+  }, [mounted, refreshUserData]);
 
   // Create a safe version of the context that doesn't cause hydration mismatches
   const safeContext: AuthContextType = {

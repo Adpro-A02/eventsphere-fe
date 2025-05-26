@@ -1,6 +1,10 @@
 "use client";
-import { getToken } from "@/lib/auth-storage";
+
+import type React from "react";
+
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { getAllEvents } from "@/lib/event-api";
 import Link from "next/link";
 import {
   CalendarIcon,
@@ -21,45 +25,55 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  event_date: string;
-  location: string;
-  status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "COMPLETED";
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  basePrice: number;
-}
+import type { Event } from "@/lib/types";
 
 export default function EventsPage() {
+  const { hasRole, isGuest } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const canCreateEvents = hasRole("Organizer");
+
+  const sortEventsByStatus = (events: Event[]) => {
+    const statusPriority = {
+      PUBLISHED: 1,
+      DRAFT: 2,
+      CANCELLED: 3,
+      COMPLETED: 4,
+    };
+
+    return events.sort((a, b) => {
+      const priorityA =
+        statusPriority[a.status as keyof typeof statusPriority] || 4;
+      const priorityB =
+        statusPriority[b.status as keyof typeof statusPriority] || 4;
+
+      if (priorityA === priorityB) {
+        return (
+          new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
+        );
+      }
+
+      return priorityA - priorityB;
+    });
+  };
+
   useEffect(() => {
-    const fetchEvents = async () => {
+    const loadEvents = async () => {
       try {
-        const token = getToken();
-        const response = await fetch("http://localhost:8081/api/events", {
-          method: "GET",
+        let data: Event[];
 
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch events");
+        if (isGuest) {
+          data = await getAllEvents();
+        } else if (hasRole("Admin") || hasRole("Organizer")) {
+          data = await getAllEvents();
+        } else {
+          data = await getAllEvents();
         }
 
-        const data = await response.json();
-        console.log(data);
-        setEvents(data);
+        const sortedEvents = sortEventsByStatus(data);
+        setEvents(sortedEvents);
       } catch (err) {
         setError("Error fetching events. Please try again later.");
         console.error(err);
@@ -68,14 +82,15 @@ export default function EventsPage() {
       }
     };
 
-    fetchEvents();
-  }, []);
+    loadEvents();
+  }, [isGuest, hasRole]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PUBLISHED":
         return "bg-green-500";
       case "DRAFT":
+      case "CREATED":
         return "bg-yellow-500";
       case "CANCELLED":
         return "bg-red-500";
@@ -87,6 +102,7 @@ export default function EventsPage() {
   };
 
   function formatPrice(basePrice: number): React.ReactNode {
+    if (basePrice === 0) return "Free";
     return basePrice.toLocaleString("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -98,13 +114,25 @@ export default function EventsPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Events</h1>
-        <Link href="/event/create">
-          <Button>
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
-            Create Event
-          </Button>
-        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Events</h1>
+          <p className="text-muted-foreground">
+            {isGuest
+              ? "Discover upcoming events"
+              : canCreateEvents
+                ? "Manage and discover events"
+                : "Discover events to attend"}
+          </p>
+        </div>
+
+        {canCreateEvents && !isGuest && (
+          <Link href="/event/create">
+            <Button>
+              <PlusCircleIcon className="mr-2 h-4 w-4" />
+              Create Event
+            </Button>
+          </Link>
+        )}
       </div>
 
       {loading ? (
@@ -139,9 +167,29 @@ export default function EventsPage() {
       ) : events.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-gray-500 mb-4">No events found</p>
-          <Link href="/event/create">
-            <Button>Create Your First Event</Button>
-          </Link>
+          {canCreateEvents && !isGuest ? (
+            <Link href="/event/create">
+              <Button>Create Your First Event</Button>
+            </Link>
+          ) : isGuest ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Want to create events?
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button asChild>
+                  <Link href="/register">Sign Up</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Contact an organizer to create events
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -186,6 +234,28 @@ export default function EventsPage() {
               </Card>
             </Link>
           ))}
+        </div>
+      )}
+      {isGuest && events.some((event) => event.status === "PUBLISHED") && (
+        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-blue-800">
+                Ready to join events?
+              </h3>
+              <p className="text-sm text-blue-600">
+                Login or sign up to purchase tickets and register for events
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" asChild>
+                <Link href="/register">Sign Up</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

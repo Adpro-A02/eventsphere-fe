@@ -1,10 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format as formatDate } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,26 +18,27 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { getToken } from "@/lib/auth-storage";
+import { updateEvent } from "@/lib/event-api";
+import { AxiosError } from "axios";
 
-interface EventFormProps {
-  initialData?: {
-    id?: string;
+interface EditEventFormProps {
+  initialData: {
+    id: string;
     title: string;
     description: string;
     event_date: string;
     location: string;
     basePrice?: number;
   };
-  isEditing?: boolean;
 }
 
-export function EventForm({ initialData, isEditing = false }: EventFormProps) {
+export function EditEventForm({ initialData }: EditEventFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     initialData?.event_date ? new Date(initialData.event_date) : undefined,
   );
+
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -45,6 +46,17 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
     location: initialData?.location || "",
     basePrice: initialData?.basePrice?.toString() || "",
   });
+  const [time, setTime] = useState<string>("00:00");
+
+  useEffect(() => {
+    if (initialData?.event_date) {
+      const parsed = new Date(initialData.event_date);
+      const hours = String(parsed.getHours()).padStart(2, "0");
+      const minutes = String(parsed.getMinutes()).padStart(2, "0");
+      setTime(`${hours}:${minutes}`);
+    }
+  }, [initialData?.event_date]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (
@@ -65,9 +77,10 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().slice(0, 19);
-      setFormData((prev) => ({ ...prev, event_date: formattedDate }));
-      console.log("Selected event date:", formattedDate);
+      const dateStr = selectedDate.toISOString().slice(0, 10); // yyyy-mm-dd
+      const dateTime = `${dateStr}T${time}:00`; // Tambahkan waktu
+      setFormData((prev) => ({ ...prev, event_date: dateTime }));
+      console.log("Selected event datetime:", dateTime);
 
       if (errors.event_date) {
         setErrors((prev) => {
@@ -115,57 +128,31 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
 
     setIsSubmitting(true);
 
-    // Convert basePrice to number for API
     const apiFormData = {
-      ...formData,
-      basePrice: formData.basePrice ? Number(formData.basePrice) : undefined,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      location: formData.location.trim(),
+      event_date: formData.event_date,
+      basePrice: formData.basePrice !== "" ? Number(formData.basePrice) : 0,
     };
 
     try {
-      const url = isEditing
-        ? `http://localhost:8081/api/events/${initialData?.id}`
-        : "http://localhost:8081/api/events";
-      const method = isEditing ? "PUT" : "POST";
-      const token = getToken();
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(apiFormData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message ||
-            `Failed to ${isEditing ? "update" : "create"} event`,
-        );
-      }
+      console.log("Submitting INI", apiFormData);
+      await updateEvent(initialData.id, apiFormData);
 
       toast({
-        title: isEditing ? "Event Updated" : "Event Created",
-        description: `Your event has been ${isEditing ? "updated" : "created"} successfully.`,
+        title: "Event Updated",
+        description: "Your event has been updated successfully.",
       });
 
       router.push("/event");
-    } catch (error) {
-      console.error(
-        `Error ${isEditing ? "updating" : "creating"} event:`,
-        error,
-      );
+    } catch (error: unknown) {
+      console.error("Error creating event:", error);
       toast({
         title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : `Failed to ${isEditing ? "update" : "create"} event.`,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -213,7 +200,7 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : "Select date"}
+              {date ? formatDate(date, "PPP") : "Select date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
@@ -223,6 +210,34 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
               onSelect={handleDateSelect}
               initialFocus
             />
+            <div className="space-y-2">
+              <Label htmlFor="event_time">Event Time</Label>
+              <Input
+                id="event_time"
+                name="event_time"
+                type="time"
+                value={time}
+                onChange={(e) => {
+                  setTime(e.target.value);
+
+                  // Reset error kalau sebelumnya error event_date
+                  if (errors.event_date) {
+                    setErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors.event_date;
+                      return newErrors;
+                    });
+                  }
+
+                  // Update event_date secara langsung saat waktu berubah
+                  if (date) {
+                    const dateStr = date.toISOString().slice(0, 10); // yyyy-mm-dd
+                    const dateTime = `${dateStr}T${e.target.value}:00`; // waktu lengkap
+                    setFormData((prev) => ({ ...prev, event_date: dateTime }));
+                  }
+                }}
+              />
+            </div>
           </PopoverContent>
         </Popover>
         {errors.event_date && (
@@ -272,15 +287,20 @@ export function EventForm({ initialData, isEditing = false }: EventFormProps) {
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? isEditing
-              ? "Updating..."
-              : "Creating..."
-            : isEditing
-              ? "Update Event"
-              : "Create Event"}
+          {isSubmitting ? "Updating..." : "Update Event"}
         </Button>
       </div>
     </form>
   );
+}
+function getErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError && error.response?.data?.message) {
+    return error.response.data.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Something went wrong.";
 }

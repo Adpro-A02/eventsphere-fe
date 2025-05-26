@@ -13,7 +13,7 @@ export default function LoginPage() {
         </div>
 
         <LoginForm />
-    
+
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}

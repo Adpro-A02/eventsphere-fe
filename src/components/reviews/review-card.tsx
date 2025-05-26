@@ -1,5 +1,5 @@
- 
-export default function ReviewCard({ review }: { review: any }) { /* eslint-disable-line */
+export default function ReviewCard({ review }: { review: any }) {
+  /* eslint-disable-line */
   return (
     <div className="border p-4 rounded shadow-sm">
       <p className="font-semibold">Rating: {review.rating}</p>
