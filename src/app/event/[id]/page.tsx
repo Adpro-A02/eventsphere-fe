@@ -59,7 +59,7 @@ export default function EventDetailPage() {
 
         setEvent(eventData);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) { 
+      } catch (err) {
         setError("Error fetching event details. Please try again later.");
       } finally {
         setIsLoading(false);

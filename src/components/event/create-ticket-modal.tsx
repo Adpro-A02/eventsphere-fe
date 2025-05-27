@@ -92,6 +92,8 @@ export function CreateTicketModal({
       await createTicket({
         eventId,
         ...data,
+        status: "AVAILABLE",
+        remainingQuota: data.quota,
       });
 
       toast({

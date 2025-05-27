@@ -77,8 +77,8 @@ export function EditEventForm({ initialData }: EditEventFormProps) {
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
     if (selectedDate) {
-      const dateStr = selectedDate.toISOString().slice(0, 10); 
-      const dateTime = `${dateStr}T${time}:00`; 
+      const dateStr = selectedDate.toISOString().slice(0, 10);
+      const dateTime = `${dateStr}T${time}:00`;
       setFormData((prev) => ({ ...prev, event_date: dateTime }));
       console.log("Selected event datetime:", dateTime);
 
@@ -229,8 +229,8 @@ export function EditEventForm({ initialData }: EditEventFormProps) {
                   }
 
                   if (date) {
-                    const dateStr = date.toISOString().slice(0, 10); 
-                    const dateTime = `${dateStr}T${e.target.value}:00`; 
+                    const dateStr = date.toISOString().slice(0, 10);
+                    const dateTime = `${dateStr}T${e.target.value}:00`;
                     setFormData((prev) => ({ ...prev, event_date: dateTime }));
                   }
                 }}

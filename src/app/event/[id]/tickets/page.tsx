@@ -8,6 +8,7 @@ import {
   createTicket,
 } from "@/lib/api/api-tickets";
 import { getEventById } from "@/lib/api/api-events";
+import type { Event } from "@/lib/api/api-events";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -255,7 +256,7 @@ export default function EventTicketsPage() {
         tickets={tickets}
         loading={loading}
         onTicketChange={() => getTicketsByEventId(eventId).then(setTickets)}
-        selectedEvent={event}
+        selectedEvent={event ?? undefined}
       />
 
       {/* Create Ticket Modal */}

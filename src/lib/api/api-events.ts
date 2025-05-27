@@ -64,3 +64,5 @@ export async function getEventById(eventId: string): Promise<Event | null> {
     return null;
   }
 }
+
+export type { Event };

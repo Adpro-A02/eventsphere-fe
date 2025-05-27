@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { Event, Transaction } from "@/lib/types";
 import Link from "next/link";
 import { format } from "date-fns";
+
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -133,7 +134,7 @@ export default function EventDetailViewer({
               <div>
                 <h4 className="font-medium">Organizer</h4>
                 <p className="truncate max-w-[200px]">
-                  {event.organizer_name || "Unknown Organizer"}
+                  {event.user_id || "Unknown Organizer"}
                 </p>
               </div>
             </div>
@@ -197,7 +198,7 @@ export default function EventDetailViewer({
             </div>
           )}
 
-          {event.status === "COMPLETED" && (
+          {(event.status as string) === "COMPLETED" && (
             <div className="border-t pt-6 max-w-3xl mx-auto">
               <Link href={`/review/${eventId}`}>
                 <Button variant="outline" size="lg" className="w-full">
