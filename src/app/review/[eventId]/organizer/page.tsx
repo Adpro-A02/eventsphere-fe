@@ -48,7 +48,7 @@ export default function OrganizerReviewPage() {
 
   useEffect(() => {
     fetchReviews();
-  }, [eventId]);
+  }, [eventId, fetchReviews]); // Add fetchReviews to the dependency array
 
   // Flag review
   const flagReview = async (reviewId: string) => {

@@ -90,7 +90,7 @@ export function TicketPurchaseModal({
       setError(null);
       setBalanceError(null);
     }
-  }, [isOpen, user?.id]);
+  }, [isOpen, user?.id, fetchUserBalance]);
 
   const fetchUserBalance = async (userId: string) => {
     setBalanceLoading(true);
