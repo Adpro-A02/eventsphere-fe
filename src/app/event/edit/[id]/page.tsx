@@ -55,7 +55,6 @@ export default function EditEventPage({
   const canEditEvent = () => {
     if (!isAuthenticated || !user || !event) return false;
 
-    // Admin can edit any event
     if (isAdmin()) return true;
 
     return user.id === event.user_id;

@@ -22,11 +22,14 @@ export default function FlaggedReviewPage() {
   const fetchFlaggedReviews = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8080/api/reviews/flagged", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/flagged",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       if (!res.ok) throw new Error("Failed to fetch flagged reviews");
       const json = await res.json();
       setFlaggedReviews(json.data || []);
@@ -47,7 +50,7 @@ export default function FlaggedReviewPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:8080/api/reviews/delete/${reviewId}`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/delete/${reviewId}`,
         {
           method: "DELETE",
           headers: {

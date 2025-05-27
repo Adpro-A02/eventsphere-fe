@@ -28,7 +28,7 @@ export default function OrganizerReviewPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/reviews/event-reviews/my/${eventId}`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event-reviews/my/${eventId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,7 +55,7 @@ export default function OrganizerReviewPage() {
     if (!token) return alert("Anda harus login");
     try {
       const res = await fetch(
-        `http://localhost:8080/api/reviews/${reviewId}/flag`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/${reviewId}/flag`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -73,7 +73,7 @@ export default function OrganizerReviewPage() {
     if (!token) return alert("Anda harus login");
     try {
       const res = await fetch(
-        `http://localhost:8080/api/reviews/${reviewId}/cancel-flag`,
+        `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/${reviewId}/cancel-flag`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },

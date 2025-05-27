@@ -18,7 +18,6 @@ export default function OrganizerEventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ambil token dari localStorage di client side
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Anda harus login untuk melihat halaman ini.");
@@ -29,7 +28,7 @@ export default function OrganizerEventsPage() {
     const fetchOrganizerEvents = async () => {
       try {
         const res = await fetch(
-          "http://localhost:8081/api/events/organizer/my-events",
+          "http://localhost:8081api/events/organizer/my-events",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -62,7 +61,6 @@ export default function OrganizerEventsPage() {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 space-y-6">
-      {/* Back to Dashboard Button */}
       <Button
         onClick={() => router.push("/dashboard")}
         className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors duration-200"

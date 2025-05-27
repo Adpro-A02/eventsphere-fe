@@ -34,7 +34,7 @@ export default function CreateReviewPage() {
       if (!eventId) return;
 
       try {
-        const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
+        const res = await fetch(`http://localhost:8081api/events/${eventId}`);
         if (!res.ok) throw new Error("Gagal fetch event");
         const data = await res.json();
 
@@ -75,14 +75,17 @@ export default function CreateReviewPage() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch("http://localhost:8080/api/reviews", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        "https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       if (res.ok) {
         router.push(`/review/${eventId}`);
@@ -93,7 +96,6 @@ export default function CreateReviewPage() {
       }
     } catch {
       alert("Terjadi kesalahan saat membuat review.");
-      console.error();
     }
   };
 

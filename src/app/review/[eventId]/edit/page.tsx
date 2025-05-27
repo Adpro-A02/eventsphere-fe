@@ -22,12 +22,15 @@ export default function EditReviewPage() {
 
     if (!userId) return;
 
-    fetch(`http://localhost:8080/api/reviews/event/${eventId}`)
+    fetch(
+      `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/event/${eventId}`,
+    )
       .then((res) => res.json())
       .then((data) => {
         const existing = data.data.reviews.find(
+          /* eslint-disable-next-line */
           (r: any) => r.userId === userId,
-        ); /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        );
         if (existing) {
           setReviewId(existing.id);
           setRating(existing.rating);
@@ -42,7 +45,7 @@ export default function EditReviewPage() {
     if (!reviewId) return;
 
     const res = await fetch(
-      `http://localhost:8080/api/reviews/update/${reviewId}`,
+      `https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews/update/${reviewId}`,
       {
         method: "PUT",
         headers: {

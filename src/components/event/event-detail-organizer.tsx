@@ -13,6 +13,7 @@ import {
   EditIcon,
   TrashIcon,
   TagIcon,
+  TicketIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -192,22 +193,26 @@ export default function EventDetailOrganizer({
             </div>
           </div>
 
-          {/* Kalo ada yang kelebihan kurangin */}
+          {/* Add Tickets Management Button */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Management Event</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/event/${event.id}/attendees`)}
-              >
-                View Attendees
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/event/${event.id}/analytics`)}
-              >
-                Analytics
-              </Button>
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <TicketIcon className="h-5 w-5 text-gray-600" />
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Ticket Management
+                  </h3>
+                </div>
+                <Link href={`/event/${event.id}/tickets`}>
+                  <Button>
+                    <TicketIcon className="h-4 w-4 mr-2" />
+                    Manage Tickets
+                  </Button>
+                </Link>
+              </div>
+              <p className="mt-2 text-gray-600">
+                Create and manage tickets for this event
+              </p>
             </div>
           </div>
         </CardContent>

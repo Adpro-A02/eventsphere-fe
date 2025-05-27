@@ -3,7 +3,7 @@ import axios from "axios";
 import { getToken } from "@/lib/auth-storage";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_EVENT_AUTH_URL || "http://localhost:8081";
+  process.env.NEXT_PUBLIC_EVENT_AUTH_URL || "http://localhost:8002";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
