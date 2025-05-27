@@ -47,7 +47,9 @@ export default function ReviewByEventPage() {
   // Wrap functions in useCallback to prevent dependency cycle
   const fetchEvent = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:8081/api/events/${eventId}`);
+      const res = await fetch(
+        `http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`,
+      );
       if (!res.ok) throw new Error("Event tidak ditemukan");
       const json = await res.json();
       setEvent(json);
