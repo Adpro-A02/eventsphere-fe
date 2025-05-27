@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/lib/types";
 import { Ticket, getTicketsByEventId } from "@/lib/api/api-tickets";
@@ -21,7 +21,7 @@ import { CreateTicketModal } from "@/components/event/create-ticket-modal";
 import { PlusIcon, TicketIcon } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-export default function TicketsPage() {
+function TicketPageContent() {
   const { user } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -168,5 +168,13 @@ export default function TicketsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function TicketsPage() {
+  return (
+    <Suspense fallback={<div>Loading tickets...</div>}>
+      <TicketPageContent />
+    </Suspense>
   );
 }
