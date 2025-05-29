@@ -1,107 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import apiEvent from "@/libs/axios/apiEvent"; 
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
-type Event = {
+interface Event {
   id: string;
   title: string;
-  description?: string;
-  date?: string;
-};
+  location: string;
+  description: string;
+}
 
-export default function OrganizerEventsPage() {
-  const router = useRouter();
+const OrganizerEventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Anda harus login untuk melihat halaman ini.");
-      router.push("/login");
-      return;
-    }
-
-    const fetchOrganizerEvents = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:8081api/events/organizer/my-events",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (!res.ok) throw new Error("Gagal mengambil data event");
-
-        const json = await res.json();
-        setEvents(json.data?.events || []);
-      } catch (error) {
-        console.error(error);
-        alert("Gagal mengambil data event. Silakan coba lagi.");
-      } finally {
+    setLoading(true);
+    apiEvent
+      .get("/api/events/organizer/my-events")
+      .then((res) => {
+        console.log("Response data:", res.data.data);
+        const eventsArray = res.data.data.events;
+        if (Array.isArray(eventsArray)) {
+          setEvents(eventsArray);
+        } else {
+          setEvents([]);
+        }
         setLoading(false);
-      }
-    };
+      })
+      .catch(() => {
+        setError("Gagal mengambil data event organizer");
+        setLoading(false);
+      });
+  }, []);
 
-    fetchOrganizerEvents();
-  }, [router]);
 
-  if (loading) {
-    return (
-      <div className="max-w-3xl mx-auto mt-10 p-6">
-        <p>Loading events...</p>
-      </div>
-    );
-  }
+  if (loading) return <p>Loading events...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
+  if (events.length === 0) return <p>Tidak ada event yang dikelola.</p>;
 
-  return (
-    <div className="max-w-3xl mx-auto mt-10 space-y-6">
-      <Button
-        onClick={() => router.push("/dashboard")}
-        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors duration-200"
-      >
-        ← Back to Dashboard
-      </Button>
-
-      <h1 className="text-2xl font-bold mb-6">Event yang Anda Kelola: </h1>
-
-      {events.length === 0 && (
-        <p className="text-gray-600">Anda belum mengelola event apapun.</p>
-      )}
-
-      {events.map((event) => (
-        <Card
-          key={event.id}
-          className="cursor-pointer"
-          onClick={() => router.push(`/review/${event.id}/organizer`)}
+return (
+  <div>
+    <h1 className="text-2xl font-bold mb-6">Event yang Anda Kelola:</h1>
+    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {events.map((e) => (
+        <li
+          key={e.id}
+          className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-shadow"
         >
-          <CardHeader>
-            <CardTitle>{event.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {event.description && <p className="mb-2">{event.description}</p>}
-            {event.date && (
-              <p className="text-sm text-gray-500">
-                Tanggal: {new Date(event.date).toLocaleDateString()}
-              </p>
-            )}
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/review/${event.id}/organizer`);
-              }}
-              className="mt-3"
-            >
-              Lihat Review
-            </Button>
-          </CardContent>
-        </Card>
+          <button
+            onClick={() => router.push(`/review/${e.id}/organizer`)}
+            className="text-blue-700 font-semibold text-lg hover:underline mb-3 text-left"
+          >
+            {e.title}
+          </button>
+
+          <div className="text-gray-700 mb-2">
+            <span className="font-semibold">Lokasi:</span> {e.location}
+          </div>
+
+          <div className="text-gray-600 flex-grow">
+            <span className="font-semibold">Deskripsi:</span>{" "}
+            {e.description.length > 100
+              ? e.description.substring(0, 100) + "..."
+              : e.description}
+          </div>
+        </li>
       ))}
-    </div>
-  );
+    </ul>
+  </div>
+);
 }
+
+export default OrganizerEventsPage;

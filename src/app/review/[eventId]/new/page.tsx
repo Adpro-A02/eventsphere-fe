@@ -1,140 +1,44 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import apiReview from "@/libs/axios/apiReview";
+import ReviewForm from "@/components/reviews/review-form";
 
-export default function CreateReviewPage() {
-  const { eventId } = useParams() as { eventId: string };
+const NewReviewPage = () => {
   const router = useRouter();
+  const { eventId } = useParams();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [rating, setRating] = useState<number>(5);
-  const [comment, setComment] = useState<string>("");
-  const [userId, setUserId] = useState<string | null>(null);
-  const [organizerId, setOrganizerId] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUserId(payload.sub);
-      } catch {
-        setUserId(null);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchEvent = async () => {
-      if (!eventId) return;
-
-      try {
-        const res = await fetch(
-          `http://ec2-52-206-2-172.compute-1.amazonaws.com/api/events/${eventId}`,
-        );
-        if (!res.ok) throw new Error("Gagal fetch event");
-        const data = await res.json();
-
-        setOrganizerId(data.user_id || data.data?.user_id || null);
-      } catch (e) {
-        setOrganizerId(null);
-        console.error("Error fetch event:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvent();
-  }, [eventId]);
-
-  const handleSubmit = async () => {
-    if (!userId) {
-      alert("Anda harus login terlebih dahulu.");
-      return;
-    }
-    if (!organizerId) {
-      alert("Tidak dapat menentukan organizer event.");
-      return;
-    }
-
-    const now = new Date().toISOString();
-
-    const payload = {
-      eventId,
-      organizerId,
-      userId,
-      rating,
-      comment,
-      createdDate: now,
-      updatedDate: now,
-    };
-
-    const token = localStorage.getItem("token");
-
+  const handleSubmit = async (data: { rating: number; comment: string }) => {
+    setError(null);
+    setLoading(true);
     try {
-      const res = await fetch(
-        "https://personal-alys-gilbertkristiaan-f3b1cb41.koyeb.app/api/reviews",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      if (res.ok) {
-        router.push(`/review/${eventId}`);
-      } else {
-        alert(
-          "Gagal membuat review. Anda sudah pernah membuat review untuk event ini.",
-        );
-      }
-    } catch {
-      alert("Terjadi kesalahan saat membuat review.");
+      const now = new Date().toISOString();
+      await apiReview.post("/api/reviews", {
+        eventId,
+        rating: data.rating,
+        comment: data.comment,
+        createdDate: now,
+        updatedDate: now,
+      });
+      router.push(`/review/${eventId}`);
+    } catch (e: any) { // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError(e.response?.data?.message || "Gagal membuat review");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <Card className="max-w-xl mx-auto mt-10 p-6">
-        <CardHeader>
-          <CardTitle>Memuat data event...</CardTitle>
-        </CardHeader>
-        <CardContent>Mohon tunggu...</CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <Card className="max-w-xl mx-auto mt-10 p-6">
-      <CardHeader>
-        <CardTitle>Buat Review</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Input
-          type="number"
-          min={1}
-          max={5}
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          placeholder="Rating (1-5)"
-        />
-        <Textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Tulis komentar..."
-        />
-        <Button onClick={handleSubmit} className="bg-green-600 text-white">
-          Submit
-        </Button>
-      </CardContent>
-    </Card>
+    <div>
+      <h1>Buat Review untuk Event {eventId}</h1>
+      {error && <p className="text-red-600">{error}</p>}
+      <ReviewForm onSubmit={handleSubmit} isSubmitting={loading} />
+    </div>
   );
-}
+};
+
+export default NewReviewPage;

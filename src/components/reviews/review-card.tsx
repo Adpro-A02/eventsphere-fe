@@ -1,10 +1,31 @@
+import React from "react";
 
-export default function ReviewCard({ review }: { review: any }) { /* eslint-disable-line @typescript-eslint/no-explicit-any */
+export interface ReviewCardProps {
+  rating: number;
+  comment: string;
+  userId: string;
+  status?: string;
+}
+
+const ReviewCard: React.FC<ReviewCardProps> = ({ rating, comment, userId, status }) => {
   return (
-    <div className="border p-4 rounded shadow-sm">
-      <p className="font-semibold">Rating: {review.rating}</p>
-      <p>{review.comment}</p>
-      <p className="text-sm text-gray-500">Status: {review.status}</p>
+    <div className="border p-4 rounded-md shadow-sm mb-4">
+      <div>
+        <strong>User:</strong> {userId}
+      </div>
+      <div>
+        <strong>Rating:</strong> {rating} / 5
+      </div>
+      <div>
+        <strong>Comment:</strong> {comment}
+      </div>
+      {status && (
+        <div>
+          <strong>Status:</strong> {status}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default ReviewCard;
