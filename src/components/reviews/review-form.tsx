@@ -32,7 +32,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     }
     try {
       await onSubmit({ rating, comment });
-    } catch (err: any) { // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat submit");
     }
   };
