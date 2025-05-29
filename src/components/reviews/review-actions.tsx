@@ -1,45 +1,64 @@
 "use client";
 
-export default function ReviewActions({ review }: { review: any }) {
-  /* eslint-disable-line */
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+import React from "react";
 
-  const deleteReview = async () => {
-    await fetch(`/api/reviews/delete/${review.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    window.location.reload();
-  };
+interface ReviewActionsProps {
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onFlag?: () => void;
+  onCancelFlag?: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canFlag?: boolean;
+  canCancelFlag?: boolean;
+}
 
-  const flagReview = async () => {
-    await fetch(`/api/reviews/${review.id}/flag`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    window.location.reload();
-  };
-
-  const cancelFlag = async () => {
-    await fetch(`/api/reviews/${review.id}/cancel-flag`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    window.location.reload();
-  };
-
+const ReviewActions: React.FC<ReviewActionsProps> = ({
+  onEdit,
+  onDelete,
+  onFlag,
+  onCancelFlag,
+  canEdit = false,
+  canDelete = false,
+  canFlag = false,
+  canCancelFlag = false,
+}) => {
   return (
-    <div className="flex space-x-2 mt-2">
-      <button onClick={deleteReview} className="text-red-600">
-        Hapus
-      </button>
-      <button onClick={flagReview} className="text-yellow-600">
-        Flag
-      </button>
-      <button onClick={cancelFlag} className="text-green-600">
-        Cancel Flag
-      </button>
+    <div className="flex gap-2 mt-2">
+      {canEdit && (
+        <button
+          onClick={onEdit}
+          className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+        >
+          Edit
+        </button>
+      )}
+      {canDelete && (
+        <button
+          onClick={onDelete}
+          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Hapus
+        </button>
+      )}
+      {canFlag && (
+        <button
+          onClick={onFlag}
+          className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+        >
+          Flag
+        </button>
+      )}
+      {canCancelFlag && (
+        <button
+          onClick={onCancelFlag}
+          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+        >
+          Cancel Flag
+        </button>
+      )}
     </div>
   );
-}
+};
+
+export default ReviewActions;

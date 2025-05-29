@@ -38,8 +38,8 @@ import { useToast } from "@/components/ui/use-toast";
 const topUpSchema = z.object({
   amount: z
     .number()
-    .min(1, "Amount must be at least $1")
-    .max(10000, "Maximum amount is $10,000"),
+    .min(1, "Amount must be at least Rp 1")
+    .max(5000000, "Maximum amount is Rp 5,000,000"),
   payment_method: z.string().min(1, "Please select a payment method"),
 });
 
@@ -128,7 +128,7 @@ export default function TopUpModal() {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Amount (Rp)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -138,7 +138,7 @@ export default function TopUpModal() {
                         field.onChange(parseFloat(e.target.value) || 0)
                       }
                       min="1"
-                      max="10000"
+                      max="5000000"
                       step="1"
                     />
                   </FormControl>

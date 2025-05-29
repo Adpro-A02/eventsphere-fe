@@ -1,20 +1,23 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import type { Event } from "@/lib/types";
+import type { Event, Transaction } from "@/lib/types";
 import Link from "next/link";
 import { format } from "date-fns";
+
 import {
   ArrowLeftIcon,
   CalendarIcon,
   MapPinIcon,
   UserIcon,
   TagIcon,
+  TicketIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
+import { TicketPurchaseModal } from "@/components/event/ticket-purchase-modal";
 
 interface EventDetailViewerProps {
   event: Event;
@@ -25,17 +28,39 @@ interface EventDetailViewerProps {
 export default function EventDetailViewer({
   event,
   eventId,
+  onEventUpdate,
 }: EventDetailViewerProps) {
-  const router = useRouter();
   const { isAuthenticated, isGuest } = useAuth();
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [transactionComplete, setTransactionComplete] = useState(false);
 
-  const handleTicket = () => {
-    {
-      /* Tombol Beli tiket*/
+  const handleTransactionSuccess = (transaction: Transaction) => {
+    setTransactionComplete(true);
+
+    const ticketQuantity = calculateTicketQuantity(transaction);
+
+    if (onEventUpdate) {
+      const updatedEvent = {
+        ...event,
+        registered_count: (event.registered_count || 0) + ticketQuantity,
+      };
+      onEventUpdate(updatedEvent);
     }
-    router.push(
-      `/register?eventId=${eventId}&returnUrl=${encodeURIComponent(`/event/${eventId}`)}`,
-    );
+  };
+
+  const calculateTicketQuantity = (transaction: Transaction): number => {
+    const descriptionMatch =
+      transaction.description.match(/\((\d+) tickets?\)/);
+    if (descriptionMatch) {
+      return parseInt(descriptionMatch[1], 10);
+    }
+
+    if (event.basePrice && event.basePrice > 0) {
+      return Math.round(transaction.amount / event.basePrice);
+    }
+
+    // Default fallback
+    return 1;
   };
 
   const formatPrice = (price?: number) => {
@@ -63,7 +88,6 @@ export default function EventDetailViewer({
           Back to Events
         </Link>
       </div>
-
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <div>
@@ -110,17 +134,42 @@ export default function EventDetailViewer({
               <div>
                 <h4 className="font-medium">Organizer</h4>
                 <p className="truncate max-w-[200px]">
-                  {event.organizer_name || "Unknown Organizer"}
+                  {event.user_id || "Unknown Organizer"}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* BUY Ticket */}
+          {/* View Tickets Button */}
+          {event.status === "PUBLISHED" && (
+            <div className="border-t pt-6">
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TicketIcon className="h-5 w-5 text-gray-600" />
+                    <h3 className="text-lg font-medium text-gray-700">
+                      Event Tickets
+                    </h3>
+                  </div>
+                  <Link href={`/event/${eventId}/tickets`}>
+                    <Button>
+                      <TicketIcon className="h-4 w-4 mr-2" />
+                      View Tickets
+                    </Button>
+                  </Link>
+                </div>
+                <p className="mt-2 text-gray-600">
+                  View available tickets and purchase options for this event
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Legacy Quick Purchase - keep for backward compatibility */}
           {event.status === "PUBLISHED" && isAuthenticated && !isGuest && (
             <div className="border-t pt-6">
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Purchase Ticket</h3>
+                <h3 className="text-lg font-medium mb-2">Quick Purchase</h3>
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <p className="text-2xl font-bold text-green-600">
@@ -134,39 +183,43 @@ export default function EventDetailViewer({
                   </div>
                   <Button
                     size="lg"
-                    onClick={handleTicket}
-                    disabled={!!isEventFull}
+                    onClick={() => setShowTicketModal(true)}
+                    disabled={!!isEventFull || transactionComplete}
                     className="min-w-[120px]"
                   >
-                    {isEventFull ? "Event Full" : "Buy Now"}
+                    {isEventFull
+                      ? "Event Full"
+                      : transactionComplete
+                        ? "Purchased"
+                        : "Buy Now"}
                   </Button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Event Info for all users */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Event Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-700">Attendees</h4>
-                <p className="text-xl font-bold text-gray-600">
-                  {event.registered_count || 0} registered
-                </p>
-              </div>
-              {event.capacity && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-700">Capacity</h4>
-                  <p className="text-xl font-bold text-gray-600">
-                    {event.capacity} max
-                  </p>
-                </div>
-              )}
+          {(event.status as string) === "COMPLETED" && (
+            <div className="border-t pt-6 max-w-3xl mx-auto">
+              <Link href={`/review/${eventId}`}>
+                <Button variant="outline" size="lg" className="w-full">
+                  Lihat Review
+                </Button>
+              </Link>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Ticket Purchase Modal */}
+      {showTicketModal && (
+        <TicketPurchaseModal
+          event={event}
+          eventId={eventId}
+          isOpen={showTicketModal}
+          onClose={() => setShowTicketModal(false)}
+          onSuccess={handleTransactionSuccess}
+        />
+      )}
     </div>
   );
 }
