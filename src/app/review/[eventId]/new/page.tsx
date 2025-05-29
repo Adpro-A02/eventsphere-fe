@@ -24,7 +24,8 @@ const NewReviewPage = () => {
         updatedDate: now,
       });
       router.push(`/review/${eventId}`);
-    } catch (e: any) { // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       setError(e.response?.data?.message || "Gagal membuat review");
     } finally {
       setLoading(false);
