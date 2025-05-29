@@ -36,6 +36,7 @@ const Navbar: React.FC = () => {
   }
   const fullNavRoute = [
     { id: 1, href: "/ads", name: "Manajemen Iklan" },
+    { id: 2, href: "/review", name: "Review" },
     { id: 3, href: "/event", name: "Event" },
     { id: 4, href: "/transaction", name: "Transaksi" },
     { id: 6, href: "/admin", name: "Admin", adminOnly: true },
