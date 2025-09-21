@@ -19,6 +19,8 @@ jobs:
         with:
           vercel-cli: vercel
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: "-y --prod"
+          working-directory: ./
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
